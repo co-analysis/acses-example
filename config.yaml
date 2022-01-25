@@ -1,3 +1,4 @@
+baseURL: https://co-analysis.github.io/govuk-hugo-demo/
 languageCode: en-gb
 title: Civil Service Statistics
 theme: govukhugo
