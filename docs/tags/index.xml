@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Civil Service Statistics</title>
-    <link>https://co-analysis.github.io/govuk-hugo-demo/tags/</link>
+    <link>https://co-analysis.github.io/acses-example/tags/</link>
     <description>Recent content in Tags on Civil Service Statistics</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-gb</language><atom:link href="https://co-analysis.github.io/govuk-hugo-demo/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-gb</language><atom:link href="https://co-analysis.github.io/acses-example/tags/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
