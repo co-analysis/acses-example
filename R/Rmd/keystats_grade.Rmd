@@ -87,16 +87,13 @@ cs19t1_all_gdf <- cs19 |>
 
 ```
 
-::::{.govuk-grid-row .data-row}
+{{< warning "This is a prototype based on data from the 2019 statistics." >}}
 
-:::{.govuk-grid-column-two-thirds}
+
 Administrative staff comprised just over a third of civil servants (33.6%) in 2019, compared to almost a half (47.1%) in 2011. There are now 5,970 civil servants working at the Senior Civil Service level, which equates to 1.3% of the Civil Service.
 
 Overall, 53.9% of civil servants are female, however this varies noticeably by grade. More than half of civil servants at administrative and executive officer grades are female (57.2% and 56.1% respectively), while less than of those in Grade 6 and & or at Senior Civil Service level are female (46.9% and 44.7% respectively).
 
-:::
-
-:::{.govuk-grid-column-one-third}
 ```{r graph}
 p <- ggplot(cs19t1_all_gdf, aes(x = grade, y = y_value, fill = sex)) +
   geom_col() +
@@ -128,9 +125,8 @@ govukhugo::render_svg(plot = p, 400, 300,
                       alt_title = "Civil Service grade by sex",
                       caption = "alt_title")
 ```
-:::
 
-::::
+:::{.data-card}
 
 ```{r}
 
@@ -145,3 +141,4 @@ govukhugo::govuk_datatable(
 
 ```
 
+:::
