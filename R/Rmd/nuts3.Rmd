@@ -1,9 +1,9 @@
 ---
-title: "Civil Servants by NUTS2"
+title: "Civil Servants by NUTS3"
 date: 2021-01-01
 section: maps
 weight: 100
-summary: "Map of civil servants by NUTS2 groupings"
+summary: "Map of civil servants by NUTS3 local authority groupings"
 ---
 
 ```{r setup, include=FALSE}
@@ -72,42 +72,41 @@ bincol <- colorBin(palette = "YlGnBu",
 
 ```
 
+{{< warning "This is a prototype based on data from the 2019 statistics." >}}
+
 As of 31 March 2019, there were 445,480 civil servants working for the UK Civil Service &mdash; of which 20% work in London. The map shows the number of UK civil servants by the local area (NUTS3 areas) of their main work location. There are also a further 7,920 civil servants who work overseas or whose working location is not known.
 
 ```{r map, echo=FALSE, warning=FALSE}
 leaflet(leaf_dt, width = "100%", height = 600) %>%
   addProviderTiles(providers$CartoDB.PositronNoLabels) %>%
-  addMapPane("dt", zIndex = 410) %>%
-  addMapPane("labs", zIndex = 420) %>%
+  addProviderTiles(providers$CartoDB.PositronOnlyLabels) %>%
   addPolygons(color = "#aaaaaa",
               weight = 1,
               fillColor = ~bincol(value),
               popup = ~paste(NUTS318NM, value, sep = ": "),
-              fillOpacity = 0.8,
-              options = pathOptions(pane = "dt")) %>%
+              fillOpacity = 0.5) %>%
+  addMapPane("overlay", zIndex = 600) %>%
   addPolygons(data = london_spdf,
               color = "#F47738",
               opacity = 1,
               weight = 2,
               fill = FALSE,
               group = "London",
-              options = pathOptions(pane = "dt")) %>%
+              options = pathOptions(pane = "overlay")) %>%
   addPolygons(data = manchester_spdf,
               color = "#F47738",
               opacity = 1,
               weight = 3,
               fill = FALSE,
               group = "Core Cities",
-              options = pathOptions(pane = "dt")) %>%
+              options = pathOptions(pane = "overlay")) %>%
   addPolygons(data = cities_spdf,
               color = "#F47738",
               opacity = 1,
               weight = 3,
               fill = FALSE,
               group = "Core Cities",
-              options = pathOptions(pane = "dt")) %>%
-  addProviderTiles(providers$CartoDB.PositronOnlyLabels, 
-                   options = providerTileOptions(pane = "labs")) %>%
+              options = pathOptions(pane = "overlay")) %>%
   addLegend(position = "topright", pal = bincol, values = ~leaf_dt$value, 
             title = "Headcount", opacity = 0.8) %>%
   addLayersControl(
