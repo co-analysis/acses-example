@@ -1,4 +1,4 @@
-baseURL: https://co-analysis.github.io/govuk-hugo-demo/
+baseURL: https://co-analysis.github.io/acses-example/
 languageCode: en-gb
 title: Civil Service Statistics
 theme: govukhugo
@@ -30,4 +30,4 @@ params:
   logo: crown
   product: Civil Service Statistics
   phase: alpha
-  feedbackurl: https://your.site/feedback
+  feedbackurl: https://co-analysis.github.io/acses-example/feedback/
