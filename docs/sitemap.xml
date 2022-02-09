@@ -3,46 +3,46 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/keystats/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/keystats/</loc>
     <lastmod>2022-01-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/maps/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/maps/</loc>
     <lastmod>2022-01-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/keystats/keystats_grade/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/keystats/keystats_grade/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/maps/nuts3/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/maps/nuts3/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/data/data_download/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/data/data_download/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/</loc>
     <lastmod>2022-01-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/data/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/data/</loc>
     <lastmod>2021-01-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/categories/</loc>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>https://co-analysis.github.io/govuk-hugo-demo/tags/</loc>
   </url>
   
 </urlset>

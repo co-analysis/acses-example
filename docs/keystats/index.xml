@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Key statistics on Civil Service Statistics</title>
-    <link>/keystats/</link>
+    <link>https://co-analysis.github.io/govuk-hugo-demo/keystats/</link>
     <description>Recent content in Key statistics on Civil Service Statistics</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
-    <lastBuildDate>Mon, 17 Jan 2022 00:00:00 +0000</lastBuildDate><atom:link href="/keystats/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 17 Jan 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://co-analysis.github.io/govuk-hugo-demo/keystats/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Civil servants by grade</title>
-      <link>/keystats/keystats_grade/</link>
+      <link>https://co-analysis.github.io/govuk-hugo-demo/keystats/keystats_grade/</link>
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
       
-      <guid>/keystats/keystats_grade/</guid>
+      <guid>https://co-analysis.github.io/govuk-hugo-demo/keystats/keystats_grade/</guid>
       <description>Headline statistics of Civil Servants by grade</description>
     </item>
     

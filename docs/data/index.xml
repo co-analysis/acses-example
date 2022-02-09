@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Data on Civil Service Statistics</title>
-    <link>/data/</link>
+    <link>https://co-analysis.github.io/govuk-hugo-demo/data/</link>
     <description>Recent content in Data on Civil Service Statistics</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-gb</language>
-    <lastBuildDate>Fri, 01 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="/data/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 01 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://co-analysis.github.io/govuk-hugo-demo/data/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Data download</title>
-      <link>/data/data_download/</link>
+      <link>https://co-analysis.github.io/govuk-hugo-demo/data/data_download/</link>
       <pubDate>Fri, 01 Jan 2021 00:00:00 +0000</pubDate>
       
-      <guid>/data/data_download/</guid>
+      <guid>https://co-analysis.github.io/govuk-hugo-demo/data/data_download/</guid>
       <description>Download the CS statistics data</description>
     </item>
     
