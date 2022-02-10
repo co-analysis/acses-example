@@ -106,6 +106,10 @@ From this page you can download the raw statistical tables that make up the Civi
 
 You can use the filters and table below to create your own subset of the Civil Service Statistics to extract only the data you're interested in. The copy button will copy the data to your clipboard so you can paste it into another application (such as a spreadsheet). The CSV button allows you to download the filtered table as a comma separated values file.
 
+:::{.loading}
+{{< warning "Loading table..." >}}
+:::
+
 ::::{.govuk-grid-row .data-card}
 
 :::{.govuk-grid-column-one-quarter .data-filters .govuk-body-s}
@@ -113,12 +117,14 @@ You can use the filters and table below to create your own subset of the Civil S
 <span class="govuk-heading-s">Filters</span>
 
 ```{r selector, echo=FALSE}
-unstrap(fs_table)
-unstrap(fs_grade)
-unstrap(fs_sex)
-unstrap(fs_ethnicity)
-unstrap(fs_disability)
+fs_table
+fs_grade
+fs_sex
+fs_ethnicity
+fs_disability
+govukhugo::clear_filters()
 ```
+
 :::
 
 :::{.govuk-grid-column-three-quarters .data-display}

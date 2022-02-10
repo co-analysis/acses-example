@@ -126,7 +126,8 @@ govukhugo::render_svg(plot = p, 400, 300,
                       caption = "alt_title")
 ```
 
-:::{.data-card}
+:::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full}
 
 ```{r}
 
@@ -140,5 +141,5 @@ govukhugo::govuk_datatable(
   DT::formatPercentage(6:7, digits = 1)
 
 ```
-
+:::
 :::
