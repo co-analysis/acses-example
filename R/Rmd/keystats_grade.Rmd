@@ -133,9 +133,13 @@ govukhugo::render_svg(plot = p, 400, 300,
 
 govukhugo::govuk_datatable(
   cs19t1_all,
+  title = "Civil servants by grade and sex",
   col_names = c("Grade", "Female", "Male", "Unknown", "Total", "Percent female",
                 "Percent grade"),
-  search = FALSE
+  search = FALSE,
+  options = list(ordering = FALSE),
+  copy_info = "Civil Service Statistics, 2019",
+  export_file = "civilservicestatistics2019_grade-by-sex"
   ) |>
   DT::formatRound(2:5, digits = 0) |>
   DT::formatPercentage(6:7, digits = 1)
