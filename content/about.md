@@ -2,6 +2,7 @@
 title: "About"
 date: 2022-02-09
 type: post
+custom_title: "About Civil Service Statistics"
 ---
 
 This site is a work in progress prototype, to demonstrate and test a new approach to publishing the Civil Service Statistics. It is being developed in the open to enable end-user consultation and feedback. All data is from published statistics, however the content is likely to frequently change and therefore should not be relied on for analysis. Moreover, due to the format of the published data files the data reported here is likely to date to 2019. Please refer to the <a href="https://www.gov.uk/government/collections/civil-service-statistics" rel="noreferrer noopener" target="_blank">Civil Service Statistics</a> published on GOV.UK for the official publications and more recent data.

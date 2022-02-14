@@ -2,6 +2,7 @@
 title: "Key statistics"
 date: 2022-01-17
 type: post
+custom_title: "Civil Service Statistics 2022"
 listpages: true
 weight: -200
 ---
