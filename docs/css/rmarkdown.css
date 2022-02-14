@@ -56,6 +56,7 @@
 }
 
 .dt-buttons button {
+  background-color: unset;
   margin-bottom: 10px !important;
   border: 0;
   cursor: pointer;
@@ -139,31 +140,6 @@
   background-color: #fff !important;
   text-align: left;
   padding: 15px !important;
-}
-
-
-/*  ===========================
-    data-card section styling
-    =========================== */
-
-.data-card {
-  background-color: var(--govuk-colour-light-grey);
-  padding: 15px 0px;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.data-filters {
-  margin-top: 5px;
-}
-
-.data-display {
-  border-left: 2px solid var(--govuk-border-colour);
-}
-
-.data-card.govuk-grid-column-full,
-.data-card .govuk-grid-column-full {
-  padding: 0px 15px;
 }
 
 /*  ===========================
