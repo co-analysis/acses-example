@@ -46,7 +46,8 @@ cs_nuts3 <- cs19_t15 %>%
   full_join(nuts3_codes) %>%
   mutate(pc = formattable::percent(
     value/445480),
-    value = formattable::comma(value, digits = 0))
+    value = formattable::comma(value, digits = 0)) %>%
+  arrange(-value)
 # Read in NUTS3 shapes
 nuts3_spdf <- geojson_read(urls$nuts3_shapes, what = "sp")
 # Read in NUTS1 shapes, select only London
@@ -60,32 +61,52 @@ core_cities <- c(Birmingham = "UKG31", Bristol = "UKK11", Cardiff = "UKL22",
                  Glasgow = "UKM82", Leeds = "UKE42", Liverpool = "UKD72", 
                  Newcastle = "UKC22", Nottingham = "UKF14", Sheffield = "UKE32")
 cities_spdf <- nuts3_spdf[nuts3_spdf$nuts318cd %in% core_cities,]
+
+wm_data <- cs_nuts3 %>%
+  filter(NUTS318CD == "UKI32")
+wm_spdf <- sp::merge(nuts3_spdf, wm_data, by.x = "nuts318cd", by.y = "NUTS318CD")
+
+other_areas <- cs_nuts3 %>%
+  filter(NUTS318CD != "UKI32")
+
 # merge nuts3 shapes with data
 leaf_dt <- sp::merge(nuts3_spdf, cs_nuts3, by.x = "nuts318cd", by.y = "NUTS318CD")
 # create colouring function
 bincol <- colorBin(palette = "YlGnBu",
                    domain = leaf_dt$value,
-                   bins = c(0, 500, 1000, 2500, 5000, 7000, 40000, 50000),
+                   bins = c(0, 500, 1000, 2500, 5000, 7000, 50000),
                    pretty = FALSE,
                    na.color = "#eeeeee")
 
 
 ```
 
-{{< warning "This is a prototype based on data from the 2019 statistics." >}}
 
 As of 31 March 2019, there were 445,480 civil servants working for the UK Civil Service &mdash; of which 20% work in London. The map shows the number of UK civil servants by the local area (NUTS3 areas) of their main work location. There are also a further 7,920 civil servants who work overseas or whose working location is not known.
 
+:::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full}
+
 ```{r map, echo=FALSE, warning=FALSE}
 leaflet(leaf_dt, width = "100%", height = 600) %>%
-  addProviderTiles(providers$CartoDB.PositronNoLabels) %>%
-  addProviderTiles(providers$CartoDB.PositronOnlyLabels) %>%
+  addProviderTiles(provider = providers$CartoDB.PositronNoLabels) %>%
+  # addTiles(
+  #   urlTemplate = "https://api.os.uk/maps/raster/v1/zxy/Light_3857/{z}/{x}/{y}.png?key=enjDvKSofsrqOUmqo3jUcxEsdMjI9yk4",
+  #   attribution = "Contains OS data © Crown Copyright and database rights 2022",
+  #   options = tileOptions(
+  #     minZoom = 5,
+  #     maxZoom = 16
+  #   )
+  # ) %>%
+  addMapPane("overlay", zIndex = 600) %>%
+  addMapPane("labels", zIndex = 900) %>%
+  addProviderTiles(providers$CartoDB.PositronOnlyLabels,
+                   options = providerTileOptions(pane = "labels")) %>%
   addPolygons(color = "#aaaaaa",
               weight = 1,
               fillColor = ~bincol(value),
               popup = ~paste(NUTS318NM, value, sep = ": "),
               fillOpacity = 0.5) %>%
-  addMapPane("overlay", zIndex = 600) %>%
   addPolygons(data = london_spdf,
               color = "#F47738",
               opacity = 1,
@@ -116,3 +137,6 @@ leaflet(leaf_dt, width = "100%", height = 600) %>%
   hideGroup(c("London", "Core Cities"))
 ```
 
+:::
+
+:::
