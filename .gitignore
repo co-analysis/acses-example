@@ -44,3 +44,6 @@ R/2020_data
 
 # mac files
 .DS_Store
+
+# Hugo files
+.hugo_build.lock
