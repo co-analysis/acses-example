@@ -43,5 +43,15 @@
       <description>This site is a work in progress prototype, to demonstrate and test a new approach to publishing the Civil Service Statistics. It is being developed in the open to enable end-user consultation and feedback. All data is from published statistics, however the content is likely to frequently change and therefore should not be relied on for analysis. Moreover, due to the format of the published data files the data reported here is likely to date to 2019.</description>
     </item>
     
+    <item>
+      <title>Quality and methodology</title>
+      <link>https://co-analysis.github.io/acses-example/methodology/</link>
+      <pubDate>Wed, 09 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://co-analysis.github.io/acses-example/methodology/</guid>
+      <description>Civil Service Statistics is an annual publication that describes the home Civil Service workforce in terms of its size, composition, salaries, and location. It also includes information on numbers joining and leaving the Civil Service. Data are sourced from the Annual Civil Service Employment Survey (ACSES) — see ‘How the output is created’ below.
+This document provides an overview of the statistics and the process by which the annual National Statistics bulletin and associated data tables are brought together.</description>
+    </item>
+    
   </channel>
 </rss>
