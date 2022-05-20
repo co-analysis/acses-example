@@ -30,4 +30,22 @@ params:
   logo: crown
   product: Civil Service Statistics
   phase: alpha
-  feedbackurl: https://co-analysis.github.io/acses-example/about/
+  feedbackurl: https://co-analysis.github.io/acses-example/about/#feedback
+  banner:
+    message: "This is a prototype and should not be considered Official Statistics"
+    url: "/about/"
+
+menu:
+  secondary:
+    - identifier: about
+      name: About
+      pageref: about.md
+      weight: 100
+    - identifier: methodology
+      name: Methodology
+      pageref: methodology.md
+      weight: 200
+    - identifier: govukpub
+      name: GOV.UK publication
+      url: https://www.gov.uk
+      weight: 300
