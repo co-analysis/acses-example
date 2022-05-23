@@ -29,9 +29,8 @@ params:
   govuk: true
   logo: crown
   product: Civil Service Statistics
-  phase: alpha
-  feedbackurl: https://co-analysis.github.io/acses-example/about/#feedback
   banner:
+    label: "Prototype"
     message: "This is a prototype and should not be considered Official Statistics"
     url: "/about/"
 
