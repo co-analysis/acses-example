@@ -4,6 +4,7 @@ title: Civil Service Statistics
 theme: govukhugo
 publishDir: docs
 canonifyurls: true
+disableKinds: ["taxonomy", "term", "RSS", "sitemap"]
 
 pygmentsUseClasses: true
 
