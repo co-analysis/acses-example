@@ -1,0 +1,220 @@
+---
+title: "Civil servants by grade"
+date: 2021-01-01
+section: structure
+weight: 100
+summary: "Headline statistics of Civil Servants by grade"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- file.path(dirname(getwd()), "data")
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+acses2021_grade_totals <- acses2021 %>%
+  filter(source_table == "table_01" & 
+           sex == "All employees" & 
+           working_pattern == "All employees") %>%
+  select(responsibility_level, value) %>%
+  mutate(
+    pc_all = value/max(value),
+    valid = case_when(
+      responsibility_level %in% c("Not reported", "All employees") ~ NA_real_,
+      TRUE ~ value
+    ),
+    pc_valid = valid/sum(valid, na.rm = TRUE)
+  )
+
+acses2021_grade_numbers <- purrr::set_names(
+  x  = scales::comma(acses2021_grade_totals$value),
+  nm = acses2021_grade_totals$responsibility_level
+)
+
+acses2021_grade_pc_all <- purrr::set_names(
+  x  = scales::percent(janitor::round_half_up(acses2021_grade_totals$pc_all, 3), 0.1),
+  nm = acses2021_grade_totals$responsibility_level
+)
+
+acses2021_grade_pc_valid <- purrr::set_names(
+  x  = scales::percent(janitor::round_half_up(acses2021_grade_totals$pc_valid, 3), 0.1),
+  nm = acses2021_grade_totals$responsibility_level
+)
+
+acses2021_grade_org <- acses2021 %>%
+  filter(source_table == "table_20") %>%
+  select(organisation, responsibility_level, value, note) %>%
+  mutate(
+    valid = case_when(
+      responsibility_level %in% c("Not reported", "All employees") ~ NA_real_,
+      TRUE ~ value
+    )
+  )
+
+acses2021_grade_org_max <- acses2021_grade_org %>%
+  group_by(organisation) %>%
+  mutate(
+    pc_all = value/max(value, na.rm = TRUE),
+    pc_valid = valid/sum(valid, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  filter(responsibility_level %in% c("Senior Civil Service Level", 
+                                     "Administrative Officers and Assistants")) %>%
+  left_join(
+    acses2021_grade_org %>% 
+      filter(responsibility_level == "All employees") %>%
+      select(organisation, all_employees = value),
+    by = "organisation"
+  ) %>%
+  anti_join(
+    acses2021_grade_org %>% 
+      filter(!is.na(note)) %>% 
+      distinct(organisation),
+    by = "organisation"
+  ) %>%
+  filter(value != 0 & organisation != "All employees" & all_employees >= 250) %>%
+  group_by(responsibility_level) %>%
+  filter(pc_valid == max(pc_valid) | valid == max(valid)) %>%
+  mutate(
+    marker = if_else(pc_valid == max(pc_valid), "percent", "number"),
+    out_value = if_else(
+      marker == "percent",
+      scales::percent(janitor::round_half_up(pc_valid, 3), 0.1),
+      scales::comma(valid)
+    ),
+    name = paste(responsibility_level, 
+                   if_else(pc_valid == max(pc_valid), "percent", "number")),
+  )
+
+max_grade_values <- purrr::set_names(
+  x  = acses2021_grade_org_max$out_value,
+  nm = acses2021_grade_org_max$name
+)
+
+max_grade_orgs <- purrr::set_names(
+  x  = acses2021_grade_org_max$organisation,
+  nm = acses2021_grade_org_max$name
+)
+
+grade_org_out <- acses2021_grade_org %>%
+  mutate(value = if_else(!is.na(note), NA_real_, value)) %>%
+  select(organisation, responsibility_level, value) %>%
+  pivot_wider(names_from = responsibility_level, values_from = value) %>%
+  select(
+    Organisation = organisation,
+    all_of(c("Senior Civil Service Level", "Grades 6 and 7",
+           "Senior and Higher Executive Officers", "Executive Officers", 
+           "Administrative Officers and Assistants", "Not reported",
+           "All employees"))
+  ) %>%
+  arrange(desc(`All employees`))
+
+```
+
+As at 31 March 2021 three in ten civil servants (`r acses2021_grade_pc_valid["Administrative Officers and Assistants"]`) were in an administrative grade[^1], compared to almost half of civil servants (47.1%) in 2011 being at an administrative grade. There are now `r acses2021_grade_numbers["Senior Civil Service Level"]` civil servants are at Senior Civil Service Level[^2], this equates to `r acses2021_grade_pc_valid["Senior Civil Service Level"]` of the Civil Service.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide">}}
+```{r grade_pyramid}
+
+acses2021_grade_pyramid <- acses2021_grade_totals %>%
+  drop_na(valid) %>%
+  select(responsibility_level, value, pc_valid) %>%
+  mutate(
+    responsibility_level = factor(
+      responsibility_level, 
+      levels = c("Administrative Officers and Assistants",
+                 "Executive Officers",
+                 "Senior and Higher Executive Officers",
+                 "Grades 6 and 7",
+                 "Senior Civil Service Level"),
+      ordered = TRUE),
+    value_label = paste0(
+      responsibility_level, " (", scales::comma(value), ", ", 
+      scales::percent(janitor::round_half_up(pc_valid, 3), 0.1), ")"
+    ),
+    value_label = str_wrap(value_label, 30),
+    bar_width = value/2
+  ) %>%
+  arrange(responsibility_level)
+
+pyramid_plot <- ggplot(acses2021_grade_pyramid,
+                       aes(x = responsibility_level, y = bar_width)) +
+  geom_col(fill = govukhugo::govuk_colours["blue"]) +
+  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["blue"]) +
+  geom_text(aes(label = value_label), hjust = 0, nudge_y = 5000, size = 4) +
+  scale_y_continuous(limits = c(-75000, 150000), expand = expansion()) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  pyramid_plot,
+  width = 600,
+  height = 250,
+  alt_title = "Civil Service headcount by grade",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by grade. The bars are ordered",
+    "by seniority level with the Senior Civil Service at the top and ",
+    "administrative staff at the bottom so as to resemble a pyramid."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide">}}
+```{r grade_table}
+
+acses2021_grade_pyramid %>%
+  select(responsibility_level, value, pc_valid) %>%
+  mutate(value = scales::comma(value),
+         pc_valid = scales::percent(janitor::round_half_up(pc_valid, 3), 0.1)) %>%
+  arrange(desc(responsibility_level)) %>%
+  knitr::kable(
+    format = "html", 
+    align = "lrr",
+    col.names = c("Grade/responsibility level", "Number", "Percent"),
+    caption = "Civil Service headcount by grade"
+  )
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
+
+## Grade by organisation
+
+Organisations with large numbers of front-line staff delivering public services tend to have a higher proportion of junior grades. `r max_grade_orgs["Administrative Officers and Assistants percent"]` has the largest proportion of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants percent"]`), while `r max_grade_orgs["Administrative Officers and Assistants number"]` has the largest number of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants number"]`).
+
+Organisations with more senior grades tend to have fewer employees delivering services directly to the public. `r max_grade_orgs["Senior Civil Service Level percent"]` has the largest proportion of staff at Senior Civil Service Level (`r max_grade_values["Senior Civil Service Level percent"]`), while `r max_grade_orgs["Senior Civil Service Level number"]` has the largest number of staff at Senior Civil Service Level (`r max_grade_values["Senior Civil Service Level number"]`)[^3].
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+```{r org_dt, echo=FALSE}
+govukhugo::govuk_datatable(
+  data = grade_org_out,
+  search = FALSE,
+  options = list(
+    columnDefs = list(
+      list(defaultContent = "[c]", targets = 1:5)
+    )
+  )
+) %>%
+  DT::formatRound(columns = 2:8, digits = 0)
+```
+:::
+::::
+
+
+
+[^1]: Proportions and percentages are of those with a known grade. There were `r acses2021_grade_numbers["Not reported"]` staff whose grade was not reported, this is equivalent to `r acses2021_grade_pc_all["Not reported"]` of all employees.
+[^2]: There are two measures for the most senior grades: the Senior Civil Service, and Senior Civil Service Level. See the [statistical notes](/about/#grading-systems-and-the-senior-civil-service) for more detail.
+[^3]: This analysis excludes organisations with less than 250 employees overall.
