@@ -1,0 +1,66 @@
+---
+title: "Civil servants by organisation"
+date: 2021-01-01
+section: structure
+weight: 100
+summary: "Headline statistics of Civil Servants by organisation"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- file.path(dirname(getwd()), "data")
+
+qpses_acses_2021 <- read_csv(
+  file.path(data_dir, "qpses_acses_2021.csv")
+)
+
+qpses_acses_totals_calc <- qpses_acses_2021 %>%
+  filter(organisation == "All employees") %>%
+  mutate(name = paste(data_source, value_type))
+
+qpses_acses_totals <- purrr::set_names(
+  x  = scales::comma(qpses_acses_totals_calc$value, 1),
+  nm = qpses_acses_totals_calc$name
+)
+
+acses_hc <- qpses_acses_2021 %>%
+  filter(value_type == "headcount" & 
+           data_source == "ACSES" &
+           organisation != "All employees") %>%
+  mutate(
+    org2 = fct_lump_lowfreq()
+  )
+
+```
+
+As at 31 March 2021, the Civil Service headcount stands at `r qpses_acses_totals["ACSES headcount"]`, an increase of 28,470[^1]. On a full-time equivalent (FTE) basis Civil Service employment stands at `r qpses_acses_totals["ACSES fte"]`[^2].
+
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide">}}
+```{r org_chart}
+
+print("Chart goes here")
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide">}}
+```{r org_table}
+
+print("Table goes here")
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
+
+
+
+[^1]: This increase does not include 19,310 Census 2021 temporary staff at UK Statistics Authority. See the [statistical notes](/about/#census-2021-temporary-staff) for more detail.
+[^2]: Full-time equivalent (FTE) takes into account the hours worked by part-time employees. For example, an individual who works 4 days instead of 5 has an FTE value of 0.8. If an organisation had 200 staff (on a headcount basis) and 150 are employed full-time, 20 are employed for 4 days a week (0.8), 20 are employed for 3 days a week (0.6) and 10 are employed for 2 days a week (0.4) then the total FTE is 182, which would be reported as 180 (as figures are rounded to the nearest 10).

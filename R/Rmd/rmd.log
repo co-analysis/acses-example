@@ -1,3 +1,4 @@
 R/Rmd/data_download.Rmd: 4bc9206cf30614fcd449de294c5acde9
-R/Rmd/keystats_grade.Rmd: b8c64df2d7332d594dc9786c509aa826
-R/Rmd/nuts3.Rmd: 8b2e8242190ec2e1f2cf0134f83af8be
+R/Rmd/location/nuts3.Rmd: c8a74dae0c547ef2b4ca9bdc041285d7
+R/Rmd/structure/grade.Rmd: a60d5d44ebe1373c54013a9fe2f72b6c
+R/Rmd/structure/organisations.Rmd: 3ed91db428896ecfe99ca5e0c5af3248
