@@ -1,0 +1,25 @@
+---
+title: "Entrants, leavers and transfers"
+date: 2021-01-01
+section: structure
+weight: 400
+summary: "Headline statistics on movements into, out of and within the Civil Service"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Each year thousands of people join and leave the Civil Service, as well as move between organisations.
+
+**Entrants** are those who have joined a Civil Service organisation and were not working elsewhere in the Civil Service.
+
+**Leavers** are those who leave a Civil Service organisation and do not go on to work elswehere in the Civil Service.
+
+**Transfers** are those who move from one Civil Service organisation to another, there are three main types of transfer:
+
+- a Machinery of Government (MoG) change, where an area of work moves from the responsibility of one organisation to another;
+- a permanent transfer, where a civil servant moves to a new job in another organisation on a permanent basis; and,
+- a loan, where a civil servant moves to a new job in another organisation on a temporary basis.
+
+

@@ -1,0 +1,13 @@
+---
+title: "Regional distribution by profession and function"
+date: 2021-01-01
+section: location
+weight: 400
+summary: "The regional distribution of civil servants by profession and function"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page

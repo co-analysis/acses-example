@@ -1,0 +1,13 @@
+---
+title: "Civil servants by sex"
+date: 2021-01-01
+section: diversity
+weight: 100
+summary: "Headline statistics for civil servants by sex"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page

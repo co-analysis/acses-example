@@ -16,6 +16,10 @@ qpses_acses_2021 <- read_csv(
   file.path(data_dir, "qpses_acses_2021.csv")
 )
 
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
 qpses_acses_totals_calc <- qpses_acses_2021 %>%
   filter(organisation == "All employees") %>%
   mutate(name = paste(data_source, value_type))
@@ -29,13 +33,16 @@ acses_hc <- qpses_acses_2021 %>%
   filter(value_type == "headcount" & 
            data_source == "ACSES" &
            organisation != "All employees") %>%
-  mutate(
-    org2 = fct_lump_lowfreq()
-  )
+  left_join(
+    group_lookup, by = "organisation"
+  ) %>%
+  add_count(dept_group, wt = value, name = "group_hc")
 
 ```
 
-As at 31 March 2021, the Civil Service headcount stands at `r qpses_acses_totals["ACSES headcount"]`, an increase of 28,470[^1]. On a full-time equivalent (FTE) basis Civil Service employment stands at `r qpses_acses_totals["ACSES fte"]`[^2].
+As at 31 March 2021, the Civil Service headcount[^1] stands at `r qpses_acses_totals["ACSES headcount"]`, an increase of 28,470[^2]. On a full-time equivalent (FTE) basis[^3] Civil Service employment stands at `r qpses_acses_totals["ACSES fte"]`.
+
+The Civil Service Statistics reports on `r nrow(group_lookup)` organisations, which are further aggregated into `r length(unique(group_lookup$dept_group))` departmental groups[^4].
 
 
 ::::{.govuk-grid-row .data-card}
@@ -44,7 +51,22 @@ As at 31 March 2021, the Civil Service headcount stands at `r qpses_acses_totals
 {{< tab title="Chart" heading="hide">}}
 ```{r org_chart}
 
-print("Chart goes here")
+# hc_treemap_df <- acses_hc %>%
+#   mutate(
+#     chart_group = fct_reorder(chart_group, group_hc, .fun = max),
+#     chart_group_label = case_when(
+#       chart_group == "Welsh Government" ~ "Welsh\nGovt",
+#       chart_group == "International Trade" ~ "DIT",
+#       chart_group == "United Kingdom Statistics Authority" ~ "UK Stats\nAuthority",
+#       chart_group == "HM Land Registry" ~ "HM Land\nRegistry",
+#       chart_group == "HM Treasury" ~ "HMT",
+#       chart_group == "Housing, Communities and Local Government" ~ "MHCLG",
+#       chart_group == "Foreign, Commonwealth and Development Office" ~ "FCDO",
+#       chart_group == "National Crime Agency" ~ "NCA",
+#       TRUE ~ str_wrap(chart_group, width = 15),
+#     ),
+#   ) %>%
+#   arrange(desc(chart_group), dept_group, value, organisation)
 
 ```
 {{< /tab >}}
@@ -61,6 +83,7 @@ print("Table goes here")
 ::::
 
 
-
-[^1]: This increase does not include 19,310 Census 2021 temporary staff at UK Statistics Authority. See the [statistical notes](/about/#census-2021-temporary-staff) for more detail.
-[^2]: Full-time equivalent (FTE) takes into account the hours worked by part-time employees. For example, an individual who works 4 days instead of 5 has an FTE value of 0.8. If an organisation had 200 staff (on a headcount basis) and 150 are employed full-time, 20 are employed for 4 days a week (0.8), 20 are employed for 3 days a week (0.6) and 10 are employed for 2 days a week (0.4) then the total FTE is 182, which would be reported as 180 (as figures are rounded to the nearest 10).
+[^1]: Add note about QPSES and ACSES.
+[^2]: Figures and increase calculations here do not include the 19,310 Census 2021 temporary staff at UK Statistics Authority. See the [statistical notes](/about/#census-2021-temporary-staff) for more detail.
+[^3]: Full-time equivalent (FTE) takes into account the hours worked by part-time employees. For example, an individual who works 4 days instead of 5 has an FTE value of 0.8. If an organisation had 200 staff (on a headcount basis) and 150 are employed full-time, 20 are employed for 4 days a week (0.8), 20 are employed for 3 days a week (0.6) and 10 are employed for 2 days a week (0.4) then the total FTE is 182, which would be reported as 180 (as figures are rounded to the nearest 10).
+[^4]: Add note on organisational/departmental structure.

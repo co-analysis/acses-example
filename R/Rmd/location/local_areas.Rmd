@@ -1,0 +1,13 @@
+---
+title: "Civil servants by local areas"
+date: 2021-01-01
+section: location
+weight: 200
+summary: "The distribution of civil servants by sub-regions/local authorities"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page

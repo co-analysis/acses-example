@@ -1,0 +1,13 @@
+---
+title: "Pay by location"
+date: 2021-01-01
+section: pay
+weight: 400
+summary: "Headline statistics on pay by location"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page

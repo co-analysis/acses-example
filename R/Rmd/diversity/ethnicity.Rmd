@@ -1,0 +1,13 @@
+---
+title: "Civil servants by ethnicity and national identity"
+date: 2021-01-01
+section: diversity
+weight: 300
+summary: "Headline statistics for civil servants by ethnicity and national identity"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page

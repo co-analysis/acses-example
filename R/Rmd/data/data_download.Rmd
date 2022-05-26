@@ -95,9 +95,6 @@ fs_disability <- crosstalk::filter_select(
 
 ```
 
-
-{{< warning "This is a prototype based on data from the 2019 statistics." >}}
-
 From this page you can download the raw statistical tables that make up the Civil Service Statistics. You can download the full file, or use the interactive table below to filter the data and select only the tables of interest.
 
 ```{=html}

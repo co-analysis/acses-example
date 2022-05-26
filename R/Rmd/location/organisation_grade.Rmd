@@ -1,0 +1,13 @@
+---
+title: "Regional distribution by organisation and grade"
+date: 2021-01-01
+section: location
+weight: 300
+summary: "The regional distribution of civil servants by organisation and grade"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Holding page
