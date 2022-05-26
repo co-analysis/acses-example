@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" class="govuk-template "><head>
-	<meta name="generator" content="Hugo 0.98.0" />
   <meta charset="utf-8">
   
   
-  <title>Civil Service Statistics</title>
+  <title>Civil Service Statistics | Pay by diversity characteristics</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0c0c">
 
@@ -36,6 +35,40 @@
   
   <link href="https://co-analysis.github.io/acses-example/css/syntax.css" rel="stylesheet">
 
+  
+  
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/header-attrs-2.11/header-attrs.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+  
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/selectize-0.12.4/js/selectize.min.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/datatables-binding-0.20/datatables.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/dt-core-jqueryui-1.11.3/css/dataTables.jqueryui.min.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-core-jqueryui-1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-core-jqueryui-1.11.3/js/dataTables.jqueryui.min.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/css/buttons.jqueryui.min.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/js/dataTables.buttons.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/js/buttons.html5.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/js/buttons.colVis.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/js/buttons.print.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/dt-ext-buttons-jqueryui-1.11.3/js/buttons.jqueryui.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/plotly-binding-4.10.0/plotly.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/typedarray-0.1/typedarray.min.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/plotly-main-2.5.1/plotly-latest.min.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/leaflet-1.3.1/leaflet.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/proj4-2.6.2/proj4.min.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/rmarkdown/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/leaflet-binding-2.0.4.1/leaflet.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script>
+  <script src="https://co-analysis.github.io/acses-example/rmarkdown/leaflet-providers-plugin-2.0.4.1/leaflet-providers-plugin.js"></script>
+  <link href="https://co-analysis.github.io/acses-example/css/rmarkdown.css" rel="stylesheet" />
   
 
   
@@ -187,7 +220,7 @@
                 
 
                 
-                <li class="nav-section"><a class="govuk-!-font-size-16" href="https://co-analysis.github.io/acses-example/pay/">Pay</a>
+                <li class="nav-section nav-active-section"><a class="govuk-!-font-size-16" href="https://co-analysis.github.io/acses-example/pay/">Pay</a>
                 </li>
                 
                 
@@ -198,7 +231,21 @@
                 
 
                 
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/salary_band/">Civil servants by salary band</a></li>
                 
+
+                
+
+                
+                
+                
+
+                
+
+                
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/grade_organisation/">Pay by grade and organisation</a></li>
                 
 
                 
@@ -210,11 +257,33 @@
                 
 
                 
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/profession_function/">Pay by profession and function</a></li>
+                
+
+                
+
+                
                 
                 
 
                 
 
+                
+                <li class="nav-item nav-active-item"><a
+                                class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state "
+                                href="https://co-analysis.github.io/acses-example/pay/diversity/">Pay by diversity characteristics</a></li>
+                
+
+                
+
+                
+
+                
+
+                
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/location/">Pay by location</a></li>
                 
 
                 
@@ -436,7 +505,7 @@
                 
 
                 
-                <li class="nav-section"><a class="govuk-!-font-size-16" href="https://co-analysis.github.io/acses-example/pay/">Pay</a>
+                <li class="nav-section nav-active-section"><a class="govuk-!-font-size-16" href="https://co-analysis.github.io/acses-example/pay/">Pay</a>
                 </li>
                 
                 
@@ -447,7 +516,21 @@
                 
 
                 
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/salary_band/">Civil servants by salary band</a></li>
                 
+
+                
+
+                
+                
+                
+
+                
+
+                
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/grade_organisation/">Pay by grade and organisation</a></li>
                 
 
                 
@@ -459,11 +542,33 @@
                 
 
                 
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/profession_function/">Pay by profession and function</a></li>
+                
+
+                
+
+                
                 
                 
 
                 
 
+                
+                <li class="nav-item nav-active-item"><a
+                                class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state "
+                                href="https://co-analysis.github.io/acses-example/pay/diversity/">Pay by diversity characteristics</a></li>
+                
+
+                
+
+                
+
+                
+
+                
+                <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
+                                href="https://co-analysis.github.io/acses-example/pay/location/">Pay by location</a></li>
                 
 
                 
@@ -568,94 +673,31 @@
 </nav></div>
                 <div class="dashboard-content">
 
+
+<h1 class="govuk-heading-xl">Pay by diversity characteristics</h1>
+
+
 <div class="govuk-body">
 
-    <h1 class="govuk-heading-xl">Civil Service Statistics 2021</h1>
+    
 
-    <p class="govuk-body-l">The Civil Service headcount is 484,880, up from 456,410 16% in 2020. On a full-time equivalent basis (FTE), 14% employment is 452,830, up from 423,770 in 2020.</p>
-<p><div class="govuk-grid-row summary-row">
-    
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">Women in the Civil Service</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">54.2%</div>
-            <div class="govuk-caption-xl govuk-!-font-size-27">&#43;0.4</div>
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="https://co-analysis.github.io/acses-example/grade/" class="govuk-link" >Diversity in the Civil Service</a></div>
-    
-</div>
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">Ethnic minorities in the Civil Service</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">14.3%</div>
-            <div class="govuk-caption-xl govuk-!-font-size-27">&#43;1.1</div>
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="" class="govuk-link" >Diversity in the Civil Service</a></div>
-    
-</div>
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">People with disabilities in the Civil Service</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">13.6%</div>
-            <div class="govuk-caption-xl govuk-!-font-size-27">&#43;0.8</div>
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="" class="govuk-link" >Diveristy in the Civil Service</a></div>
-    
-</div>
 
-</div>
-<div class="govuk-grid-row summary-row">
-    
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">Median age</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">45 years</div>
-            
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="" class="govuk-link" >Diversity in the Civil Serivce</a></div>
-    
-</div>
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">Median salary</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">£29,180</div>
-            
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="" class="govuk-link" >Pay in the Civil Service</a></div>
-    
-</div>
-<div class="data-card summary-card govuk-grid-column-one-third">
-    <div class="summary-body">
-        <div class="govuk-heading-s govuk-!-margin-bottom-0">Work outside of London</div>
-        <div class="summary-info">
-            <div class="govuk-!-font-size-48 govuk-!-font-weight-bold">78.9%</div>
-            
-        </div>
-    </div>
-    
-    <div class="summary-source govuk-!-font-size-16 govuk-!-margin-bottom-0"><a href="" class="govuk-link" >Geography of the Civil Service</a></div>
-    
-</div>
 
-</div></p>
+
+
+
+<p>Holding page</p>
+
+
+
+<!-- code folding -->
+
+
+
 
 
 </div>
+
 
 
                 </div>
@@ -793,6 +835,50 @@
 
     };
     restyleTOC();
+
+    
+
+     
+    govuk_DT_styling = function () {
+        $("table.dataTable").addClass("govuk-table");
+        $("table.dataTable caption").addClass("govuk-table__caption govuk-table__caption--m");
+        $("table.dataTable thead").addClass("govuk-table__head");
+        $("table.dataTable tbody").addClass("govuk-table__body");
+        $("table.dataTable tr").addClass("govuk-table__row");
+        $("table.dataTable th").addClass("govuk-table__header");
+        $("table.dataTable td").addClass("govuk-table__cell");
+        $(".datatables label").addClass("govuk-label govuk-!-font-size-16");
+        $(".datatables select").addClass("govuk-select govuk-!-font-size-16");
+        $(".datatables input").addClass("govuk-input govuk-!-font-size-16");
+        $(".datatables .dataTables_info").addClass("govuk-!-font-size-14");
+        $(".dataTables_paginate").addClass("govuk-!-font-size-14");
+        $(".datatables a.ui-button.ui-state-disabled").addClass("govuk-tag govuk-!-font-size-14");
+        $(".datatables a.ui-button.previous.ui-state-disabled").css("display", "none");
+        $(".datatables a.ui-button.next.ui-state-disabled").css("display", "none");
+        $(".datatables table").css("border-bottom", "unset");
+        $("button.dt-button.ui-button").addClass("govuk-!-font-size-14");
+        $(".crosstalk-input .control-label").addClass("govuk-label govuk-!-font-size-16");
+    };
+
+    reset_filters = function () {
+        $(".selectized").each(function (index, element) {
+            element.selectize && element.selectize.clear()
+        });
+
+        $("input[type='search']").val('')
+
+        $(".datatables table").DataTable().search("")
+
+    };
+
+    $(".datatables").on('init.dt', function () {
+        $('.dataTables_filter').insertAfter("#fs_org");
+        $('.loading').css("display", "none");
+    });
+
+    $(".datatables").on('draw.dt', function () { govuk_DT_styling(); });
+
+    $("#clear-filters").on('click', function () { reset_filters();});
 
     
 
