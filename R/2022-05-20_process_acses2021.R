@@ -1739,7 +1739,7 @@ aggregate_tables <- bind_rows(processed_tables,
     note = case_when(
       value == ".." ~ "[c]",
       value == "-" ~ "[z]",
-      TRUE ~ note
+      TRUE ~ ""
     ),
     value = case_when(
       !is.na(note) ~ "0",
@@ -1759,7 +1759,7 @@ aggregate_tables <- bind_rows(processed_tables,
 
 write_csv(aggregate_tables,
   "R/data/acses2021_processed.csv",
-  na = ""
+  na = "All employees"
 )
 
 ### END NOTES ----
