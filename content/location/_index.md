@@ -15,7 +15,7 @@ custom_title: "Civil servants by location"
   
   - civil servants by [country and region](country_region/),
   - civil servants by [local areas](local_areas/)
-  - regional distribution by [organisation and gread](organisation_grade/)
+  - regional distribution by [organisation and grade](organisation_grade/)
   - regional distribution by [profession and function](profession_function/)
   - regional distribution by [key diversity characteristics](diversity/)
     
