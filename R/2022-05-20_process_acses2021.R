@@ -1742,8 +1742,8 @@ aggregate_tables <- bind_rows(processed_tables,
       TRUE ~ ""
     ),
     value = case_when(
-      !is.na(note) ~ "0",
-      TRUE ~ value
+      note == "" ~ value,
+      TRUE ~ "0"
     ),
     value = as.numeric(value)
   ) %>%
@@ -1751,7 +1751,7 @@ aggregate_tables <- bind_rows(processed_tables,
     source_table,
     one_of(sort(names(.)))
   ) %>%
-  relocate(value_class, value_type, value,
+  relocate(note, value_class, value_type, value,
     .after = last_col()
   )
 
