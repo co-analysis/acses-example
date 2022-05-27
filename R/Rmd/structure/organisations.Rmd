@@ -117,6 +117,7 @@ group_hcfte <- qpses_acses_2021 %>%
 
 govukhugo::govuk_datatable(
     group_hcfte,
+    title = "Civil Service employment by departmental group",
     col_names = c("Departmental group", "Headcount", "FTE"),
     page_length = 10,
     search = FALSE
@@ -143,6 +144,7 @@ org_hcfte <- qpses_acses_2021 %>%
 
 govukhugo::govuk_datatable(
     org_hcfte,
+    title = "Civil Service employment by organisation",
     col_names = c("Departmental group", "Organisation", "Headcount", "FTE"),
     page_length = 10,
     search = FALSE
