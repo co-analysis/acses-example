@@ -14,7 +14,7 @@ custom_title: "Civil servants by location"
   <p>In this section you can explore statistics about where civil servants work:</p>
   
   - civil servants by [country and region](country_region/),
-  - civil servants by [local areas](local_areas/)
+  - civil servants by [local areas](nuts3/)
   - regional distribution by [organisation and grade](organisation_grade/)
   - regional distribution by [profession and function](profession_function/)
   - regional distribution by [key diversity characteristics](diversity/)
