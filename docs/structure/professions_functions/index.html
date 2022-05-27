@@ -908,6 +908,10 @@ internal audit.</p>
 
     document.getElementById("mobile-nav-control").onclick = function() { mobileNav() };
 
+    $("a.govuk-tabs__tab").on("click", function() {
+        window.dispatchEvent(new Event('resize'))
+    })
+
 </script>
 
 

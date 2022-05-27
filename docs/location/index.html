@@ -656,8 +656,8 @@
   <p>In this section you can explore statistics about where civil servants work:</p>
 <ul>
 <li>civil servants by <a href="country_region/" class="govuk-link" >country and region</a>,</li>
-<li>civil servants by <a href="local_areas/" class="govuk-link" >local areas</a></li>
-<li>regional distribution by <a href="organisation_grade/" class="govuk-link" >organisation and gread</a></li>
+<li>civil servants by <a href="nuts3/" class="govuk-link" >local areas</a></li>
+<li>regional distribution by <a href="organisation_grade/" class="govuk-link" >organisation and grade</a></li>
 <li>regional distribution by <a href="profession_function/" class="govuk-link" >profession and function</a></li>
 <li>regional distribution by <a href="diversity/" class="govuk-link" >key diversity characteristics</a></li>
 </ul>
@@ -839,6 +839,10 @@
     }
 
     document.getElementById("mobile-nav-control").onclick = function() { mobileNav() };
+
+    $("a.govuk-tabs__tab").on("click", function() {
+        window.dispatchEvent(new Event('resize'))
+    })
 
 </script>
 
