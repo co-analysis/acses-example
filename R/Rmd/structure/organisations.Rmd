@@ -10,7 +10,7 @@ summary: "Headline statistics of Civil Servants by organisation"
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 
-data_dir <- file.path(dirname(getwd()), "data")
+data_dir <- govukhugo::data_dir()
 
 qpses_acses_2021 <- read_csv(
   file.path(data_dir, "qpses_acses_2021.csv")
@@ -49,31 +49,105 @@ The Civil Service Statistics reports on `r nrow(group_lookup)` organisations, wh
 :::{.govuk-grid-column-full-width .data-display}
 {{< tabset >}}
 {{< tab title="Chart" heading="hide">}}
-```{r org_chart}
+```{r group_chart}
 
-# hc_treemap_df <- acses_hc %>%
-#   mutate(
-#     chart_group = fct_reorder(chart_group, group_hc, .fun = max),
-#     chart_group_label = case_when(
-#       chart_group == "Welsh Government" ~ "Welsh\nGovt",
-#       chart_group == "International Trade" ~ "DIT",
-#       chart_group == "United Kingdom Statistics Authority" ~ "UK Stats\nAuthority",
-#       chart_group == "HM Land Registry" ~ "HM Land\nRegistry",
-#       chart_group == "HM Treasury" ~ "HMT",
-#       chart_group == "Housing, Communities and Local Government" ~ "MHCLG",
-#       chart_group == "Foreign, Commonwealth and Development Office" ~ "FCDO",
-#       chart_group == "National Crime Agency" ~ "NCA",
-#       TRUE ~ str_wrap(chart_group, width = 15),
-#     ),
-#   ) %>%
-#   arrange(desc(chart_group), dept_group, value, organisation)
+group_plot_df <- acses_hc %>%
+  distinct(dept_group, group_hc) %>%
+  mutate(
+    chart_group = case_when(
+      group_hc < 1500 ~ "Other departments and agencies",
+      grepl("Standards in Education", dept_group) ~ "Ofsted",
+      TRUE ~ dept_group)
+  ) %>%
+  add_count(chart_group, wt = group_hc, name = "chart_group_hc") %>%
+  add_count(chart_group, name = "chart_group_size") %>%
+  mutate(
+    chart_group_label = paste0(chart_group, 
+                               " (", scales::comma(chart_group_hc), ")"),
+    chart_group_label = fct_reorder(chart_group_label, group_hc, .fun = max)
+  ) %>%
+  distinct(chart_group_label, chart_group_hc)
+
+group_plot <- ggplot(group_plot_df, aes(x = chart_group_label, y = chart_group_hc)) +
+  geom_col(fill = govukhugo::govuk_colours["blue"]) +
+  # geom_text(aes(label = chart_group_label),
+  #           size = 3,
+  #           colour = govukhugo::govuk_colours["govuk-secondary-text-colour"],
+  #           hjust = 0, nudge_y = 1000) +
+  scale_y_continuous(limits = c(0, 115000), expand = expansion()) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 10, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  group_plot,
+  width = 600,
+  height = 600,
+  alt_title = "Civil Service headcount by departmental group",
+  alt_desc = paste0(
+    "A bar chart showing Civil Service headcount by departmental groups,",
+    "arranged in descending order with the largest group (Work and Pensions)",
+    "first. Departmental groups with less than 1,500 staff have been grouped",
+    "together."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< small >}}Departmental groups with a headcount of less than 1,500 staff have been grouped together.{{< /small >}}
+
+{{< /tab >}}
+{{< tab title="Departmental groups" heading="hide">}}
+```{r group_table}
+
+group_hcfte <- qpses_acses_2021 %>%
+  filter(data_source == "ACSES" &
+           organisation != "All employees") %>%
+  left_join(
+    group_lookup, by = "organisation"
+  ) %>%
+  pivot_wider(names_from = value_type, values_from = value) %>%
+  group_by(dept_group) %>%
+  summarise(across(c(headcount, fte), sum), .groups = "drop") %>%
+  arrange(desc(headcount))
+
+govukhugo::govuk_datatable(
+    group_hcfte,
+    col_names = c("Departmental group", "Headcount", "FTE"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2:3, digits = 0)
 
 ```
 {{< /tab >}}
-{{< tab title="Table" heading="hide">}}
+{{< tab title="Organisations" heading="hide">}}
 ```{r org_table}
 
-print("Table goes here")
+org_hcfte <- qpses_acses_2021 %>%
+  filter(data_source == "ACSES" &
+           organisation != "All employees") %>%
+  left_join(
+    group_lookup, by = "organisation"
+  ) %>%
+  pivot_wider(names_from = value_type, values_from = value) %>%
+  group_by(dept_group) %>%
+  add_count(dept_group, wt = headcount, name = "group_hc") %>%
+  mutate(dept_group = fct_reorder(dept_group, group_hc, .desc = TRUE)) %>%
+  arrange(dept_group, desc(headcount)) %>%
+  select(dept_group, organisation, headcount, fte)
+
+govukhugo::govuk_datatable(
+    org_hcfte,
+    col_names = c("Departmental group", "Organisation", "Headcount", "FTE"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 3:4, digits = 0)
 
 ```
 {{< /tab >}}

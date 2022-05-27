@@ -6,11 +6,15 @@ weight: 100
 summary: "Headline statistics of Civil Servants by grade"
 ---
 
+```{r}
+interactive()
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 
-data_dir <- file.path(dirname(getwd()), "data")
+data_dir <- govukhugo::data_dir()
 
 acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
 
@@ -192,7 +196,7 @@ acses2021_grade_pyramid %>%
 
 ## Grade by organisation
 
-Organisations with large numbers of front-line staff delivering public services tend to have a higher proportion of junior grades. `r max_grade_orgs["Administrative Officers and Assistants percent"]` has the largest proportion of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants percent"]`), while `r max_grade_orgs["Administrative Officers and Assistants number"]` has the largest number of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants number"]`).
+Organisations with large numbers of front-line and operational staff delivering public services tend to have a higher proportion of junior grades. `r max_grade_orgs["Administrative Officers and Assistants percent"]` has the largest proportion of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants percent"]`), while `r max_grade_orgs["Administrative Officers and Assistants number"]` has the largest number of staff at an administrative grade (`r max_grade_values["Administrative Officers and Assistants number"]`).
 
 Organisations with more senior grades tend to have fewer employees delivering services directly to the public. `r max_grade_orgs["Senior Civil Service Level percent"]` has the largest proportion of staff at Senior Civil Service Level (`r max_grade_values["Senior Civil Service Level percent"]`), while `r max_grade_orgs["Senior Civil Service Level number"]` has the largest number of staff at Senior Civil Service Level (`r max_grade_values["Senior Civil Service Level number"]`)[^3].
 
