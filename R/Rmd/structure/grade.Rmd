@@ -6,10 +6,6 @@ weight: 100
 summary: "Headline statistics of Civil Servants by grade"
 ---
 
-```{r}
-interactive()
-```
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
