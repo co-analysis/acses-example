@@ -70,22 +70,17 @@ group_plot_df <- acses_hc %>%
 
 group_plot <- ggplot(group_plot_df, aes(x = chart_group_label, y = chart_group_hc)) +
   geom_col(fill = govukhugo::govuk_colours["blue"]) +
-  # geom_text(aes(label = chart_group_label),
-  #           size = 3,
-  #           colour = govukhugo::govuk_colours["govuk-secondary-text-colour"],
-  #           hjust = 0, nudge_y = 1000) +
-  scale_y_continuous(limits = c(0, 115000), expand = expansion()) +
   coord_flip() +
   theme_void() +
   theme(
     text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
-    axis.text.y = element_text(size = 10, hjust = 1, margin = margin(r = 3)),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
     plot.background = element_rect(fill = "#f3f2f100", colour = NA),
   )
 
 govukhugo::render_svg(
   group_plot,
-  width = 600,
+  width = 800,
   height = 600,
   alt_title = "Civil Service headcount by departmental group",
   alt_desc = paste0(
