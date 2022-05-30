@@ -9,6 +9,66 @@ summary: "Headline statistics of Civil Servants by profession and function"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+profession_totals <- acses2021 %>%
+  filter((source_table == "table_08" | source_table == "table_08a") &
+           organisation == "All employees" & profession_of_post != "All employees") %>%
+  select(profession_of_post, value_type, value) %>%
+  pivot_wider(names_from = value_type, values_from = value) %>%
+  mutate(
+    profession_of_post = fct_reorder(profession_of_post, headcount),
+    profession_of_post = fct_relevel(
+      profession_of_post, "Not reported", "Other", after = 0),
+    chart_label = paste0(profession_of_post, " (", scales::comma(headcount), ")")
+  ) %>%
+  arrange(profession_of_post) %>%
+  mutate(chart_label = as_factor(chart_label),
+         fill_group = if_else(
+           profession_of_post == "Not reported", "Not reported", "Reported")
+  )
+
+prof_range <- profession_totals %>%
+  filter(profession_of_post != "Not reported" & profession_of_post != "Other") %>%
+  filter(headcount == max(headcount) | headcount == min(headcount)) %>%
+  arrange(desc(headcount))
+
+prof_range <- purrr::set_names(
+  x  = prof_range$headcount,
+  nm = prof_range$profession_of_post
+)
+
+function_totals <- acses2021 %>%
+  filter((source_table == "table_d1" | source_table == "table_d2") &
+           organisation == "All employees" & function_of_post != "All employees") %>%
+  select(function_of_post, value_type, value) %>%
+  pivot_wider(names_from = value_type, values_from = value) %>%
+  mutate(
+    function_of_post = fct_reorder(function_of_post, headcount),
+    function_of_post = fct_relevel(
+      function_of_post, "Not reported", "No function", after = 0),
+    chart_label = paste0(function_of_post, " (", scales::comma(headcount), ")")
+  ) %>%
+  arrange(function_of_post) %>%
+  mutate(chart_label = as_factor(chart_label),
+         fill_group = if_else(
+           function_of_post == "Not reported", "Not reported", "Reported")
+  )
+
+func_range <- function_totals %>%
+  filter(function_of_post != "Not reported" & function_of_post != "No function") %>%
+  filter(headcount == max(headcount) | headcount == min(headcount)) %>%
+  arrange(desc(headcount))
+
+func_range <- purrr::set_names(
+  x  = func_range$headcount,
+  nm = func_range$profession_of_post
+)
+
 ```
 
 In addition to management structures like grade and organisation, there are also two important cross-government structures that support and organise civil servants: professions and Functions.
@@ -18,7 +78,136 @@ In addition to management structures like grade and organisation, there are also
 **Functions** organise people working on similar supporting services, such as: commercial, human resources (HR), and internal audit.
 
 ## Profession
-...
+The Civil Service Statistics measures `r nrow(profession_totals) - 2` professions, of these `r names(prof_range)[1]` is the largest with a headcount of `r scales::comma(prof_range[1])` and `r names(prof_range)[2]` is the smallest with a headcount of `r scales::comma(prof_range[2])`[^1].
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="profession-chart">}}
+```{r prof_chart}
+
+profession_plot <- ggplot(profession_totals,
+                       aes(x = chart_label, y = headcount, fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Reported" = unname(govukhugo::govuk_colours["blue"]),
+      "Not reported" = unname(govukhugo::govuk_colours["dark-grey"])
+    )
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  profession_plot,
+  width = 800,
+  height = 600,
+  alt_title = "Civil Service headcount by profession of post",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by profession of post.",
+    "The bars are ordered by value with the largest profession ",
+    "(Operational Delivery) at the top and the smallest profession",
+    "(Corporate Finance) at the bottom. Bars representing those classified as",
+    "'Other' or whose profession is not reported are placed after those for",
+    "the smallest profession."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="profession-table">}}
+```{r prof_table}
+
+profession_hcfte <- profession_totals %>%
+  select(profession_of_post, headcount, fte) %>%
+  arrange(desc(profession_of_post))
+
+govukhugo::govuk_datatable(
+    profession_hcfte,
+    title = "Civil Service employment by profession of post",
+    col_names = c("Profession of post", "Headcount", "FTE"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2:3, digits = 0)
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
 
 ## Function
-...
+The Civil Service Statistics measures `r nrow(function_totals) - 2` Functions, of these `r names(func_range)[1]` is the largest with a headcount of `r scales::comma(func_range[1])` and `r names(func_range)[2]` is the smallest with a headcount of `r scales::comma(func_range[2])`[^2].
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="function-chart">}}
+```{r function_chart}
+
+function_plot <- ggplot(function_totals,
+                       aes(x = chart_label, y = headcount, fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Reported" = unname(govukhugo::govuk_colours["blue"]),
+      "Not reported" = unname(govukhugo::govuk_colours["dark-grey"])
+    )
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  function_plot,
+  width = 800,
+  height = 350,
+  alt_title = "Civil Service headcount by Function of post",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by Function of post.",
+    "The bars are ordered by value with the largest Function ",
+    "(Project Delivery) at the top and the smallest profession",
+    "(Internal Audit) at the bottom. Bars representing those classified as",
+    "'No function' or whose Function is not reported are placed after those for",
+    "the smallest Function."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="function-table">}}
+```{r func_table}
+
+function_hcfte <- function_totals %>%
+  select(function_of_post, headcount, fte) %>%
+  arrange(desc(function_of_post))
+
+govukhugo::govuk_datatable(
+    function_hcfte,
+    title = "Civil Service employment by Function of post",
+    col_names = c("Function of post", "Headcount", "FTE"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2:3, digits = 0)
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+
+[^1]: While profession is available for most staff, there are some notable exceptions: the Department for Work and Pensions, the Scottish Government and most Scottish Government agencies do not provide profession information about any of their staff; the Cabinet Office only provides profession information for a small proportion of its staff.
+[^2]: Data on the Function of staff was not provided by the Department for Work and Pensions, the Home Office, the Royal Fleet Auxiliary, the Scottish Government, most Scottish Government agencies or the Welsh Government. The Ministry of Defence did not provide Function information for 48% of its staff.
