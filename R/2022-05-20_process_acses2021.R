@@ -1389,7 +1389,7 @@ processed_tables$table_40 <- readODS::read_ods(
   path = ods_file,
   sheet = "Table_40"
 ) %>%
-  .[9:193, 2:9] %>%
+  .[9:195, 2:9] %>%
   janitor::remove_empty(which = c("rows", "cols")) %>%
   set_names(
     c(
@@ -1417,7 +1417,7 @@ processed_tables$table_41 <- readODS::read_ods(
   path = ods_file,
   sheet = "Table_41"
 ) %>%
-  .[9:193, 2:19] %>%
+  .[9:195, 2:19] %>%
   janitor::remove_empty(which = c("rows", "cols")) %>%
   set_names(
     c(
