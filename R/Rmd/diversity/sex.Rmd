@@ -8,6 +8,251 @@ summary: "Headline statistics for civil servants by sex"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+sex_totals <- acses2021 %>%
+  filter(source_table == "table_01" & 
+           responsibility_level == "All employees" &
+           working_pattern == "All employees" &
+           sex != "All employees")
+
+sex_totals <- purrr::set_names(
+  x  = sex_totals$value,
+  nm = sex_totals$sex
+)
+
 ```
 
-Holding page
+As at 31 March 2021, there were `r scales::comma(sex_totals["Female"])` female civil servants (`r scales::percent(sex_totals["Female"]/sum(sex_totals), 0.11)` of those whose sex is known) and `r scales::comma(sex_totals["Male"])` male civil servants (`r scales::percent(sex_totals["Male"]/sum(sex_totals), 0.1)` of those whose sex is known) [^1][^2].
+
+The majority of both male and female civil servants work full-time, however there are four times as many female civil servants that work part time as male civil servants.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="sex-pattern-chart">}}
+```{r sex_pattern_chart}
+
+sex_working_pattern <- acses2021 %>%
+  filter(source_table == "table_01" & 
+           responsibility_level == "All employees" &
+           sex != "All employees" &
+           working_pattern != "All employees") %>%
+  select(sex, working_pattern, value) %>%
+  mutate(chart_label = str_wrap(paste0(sex, " ", working_pattern, 
+                              " (", scales::comma(value), ")"), 20),
+         chart_value = if_else(working_pattern == "Part-time", 
+                               -value, 
+                               value),
+         label_y = if_else(working_pattern == "Part-time", 
+                               -(value + 3000), 
+                               value + 3000),
+         label_hjust = if_else(working_pattern == "Part-time", 1, 0))
+
+sex_pattern_plot <- ggplot(sex_working_pattern,
+                       aes(x = fct_rev(sex), y = chart_value, fill = working_pattern)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(y = label_y, label = chart_label, hjust = label_hjust)) +
+  geom_hline(yintercept = 0, size = 1, 
+             colour = govukhugo::govuk_colours["govuk-border-colour"]) +
+  scale_fill_manual(
+    values = c(
+      "Full-time" = unname(govukhugo::govuk_colours["blue"]),
+      "Part-time" = unname(govukhugo::govuk_colours["light-blue"])
+    )
+  ) +
+  scale_y_continuous(limits = c(-150000, 250000)) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  sex_pattern_plot,
+  width = 800,
+  height = 100,
+  alt_title = "Civil Service headcount by sex and working pattern",
+  alt_desc = paste(
+    "A bar chart showing the headcount of the Civil Service by sex and",
+    "working pattern. Bars for part-time workers are shown to the left of the",
+    "vertical axis, bars for full-time workers are shown to the right of the",
+    "vertical axis. The upper bars show the figures for female civil servants",
+    "and the lower bars show the figures for male civil servants."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="sex-pattern-table">}}
+```{r sex-pattern_table}
+
+sex_pattern_table <- acses2021 %>%
+  filter(source_table == "table_01" & 
+           responsibility_level == "All employees") %>%
+  select(sex, working_pattern, value) %>%
+  group_by(working_pattern) %>%
+  mutate(pc_sex = value/max(value)) %>%
+  group_by(sex) %>%
+  mutate(pc_pattern = value/max(value)) %>%
+  ungroup()
+
+govukhugo::govuk_datatable(
+    sex_pattern_table,
+    title = "Civil Service headcount by sex and working pattern",
+    col_names = c("Sex", "Working pattern", "Headcount", "Percent of sex", "Percent of working pattern"),
+    page_length = 12,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4:5, digits = 1)
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
+
+While overall more than half of civil servants are female, there are more male than female civil servants at Senior Civil Service Level and in Grades 6 and 7. However, the proportion of the Senior Civil Service Level that is female is increasing. Females accounted for 46.7% of the Senior Civil Service Level in 2021, compared to 34.7% in 2011.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="sex-grade-chart">}}
+```{r sex_grade_chart}
+
+sex_grade <- acses2021 %>%
+  filter(source_table == "table_01" & 
+           sex != "All employees" &
+           working_pattern == "All employees" &
+           responsibility_level != "Not reported" &
+           responsibility_level != "All employees") %>%
+  select(sex, responsibility_level, value) %>%
+  mutate(
+    responsibility_level = factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants")),
+    chart_label = str_wrap(paste0(sex, " ", responsibility_level, 
+                              " (", scales::comma(value), ")"), 30),
+         chart_value = if_else(sex == "Female", 
+                               value, 
+                               -value),
+         label_y = if_else(sex == "Female", 
+                               value + 3000, 
+                               -(value + 3000)),
+         label_hjust = if_else(sex == "Female", 0, 1))
+
+sex_grade_plot <- ggplot(sex_grade,
+                       aes(x = fct_rev(responsibility_level), y = chart_value, fill = sex)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(y = label_y, label = chart_label, hjust = label_hjust)) +
+  geom_hline(yintercept = 0, size = 1, 
+             colour = govukhugo::govuk_colours["govuk-border-colour"]) +
+  scale_fill_manual(
+    values = c(
+      "Female" = unname(govukhugo::govuk_colours["blue"]),
+      "Male" = unname(govukhugo::govuk_colours["light-blue"])
+    )
+  ) +
+  scale_y_continuous(limits = c(-150000, 150000)) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  sex_grade_plot,
+  width = 800,
+  height = 300,
+  alt_title = "Civil Service headcount by sex and responsibility level",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by grade. The bars are ordered",
+    "by seniority level with the Senior Civil Service at the top and",
+    "administrative staff at the bottom so as to resemble a pyramid. Bars to",
+    "the left of the vertical axis show figures relating to male civil servants",
+    "bars to the right of the vertical axis show figures relating to female",
+    "civil servants."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="sex-grade-table">}}
+```{r sex-grade_table}
+
+sex_grade_base_table <- sex_grade %>%
+  select(sex, responsibility_level, value) %>%
+  group_by(responsibility_level) %>%
+  mutate(pc_sex = value/sum(value)) %>%
+  group_by(sex) %>%
+  mutate(pc_grade = value/sum(value))
+
+sex_grade_add_all_sex <- acses2021 %>%
+  filter(source_table == "table_01" &
+           working_pattern == "All employees" &
+           sex == "All employees") %>%
+  select(sex, responsibility_level, value) %>%
+  mutate(
+    valid = if_else(responsibility_level == "Not reported" | 
+                      responsibility_level == "All employees",
+                    NA_real_,
+                    value),
+    pc_sex = if_else(is.na(valid), NA_real_, 1),
+    pc_grade = valid/sum(valid, na.rm = TRUE)
+    )
+
+sex_grade_add_grade <- acses2021 %>%
+  filter(source_table == "table_01" &
+           working_pattern == "All employees" &
+           sex != "All employees" &
+           (responsibility_level == "Not reported" | responsibility_level == "All employees")) %>%
+  select(sex, responsibility_level, value)
+  
+
+sex_grade_table <- bind_rows(
+  sex_grade_base_table,
+  sex_grade_add_all_sex,
+  sex_grade_add_grade
+) %>%
+  mutate(
+    sex = factor(sex, levels = c("Female", "Male", "All employees")),
+    responsibility_level = factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants", "Not reported", 
+                 "All employees"))
+  ) %>%
+  arrange(responsibility_level, sex) %>%
+  select(-valid)
+
+govukhugo::govuk_datatable(
+    sex_grade_table,
+    title = "Civil Service headcount by sex and responsibility level",
+    col_names = c("Sex", "Responsibility level", "Headcount", "Percent of sex", "Percent of responsibility level"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4:5, digits = 1)
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
+
+
+[^1]: The Civil Service Statistics records sex as either Male or Female, this is drawn from data provided in organisations' HR systems and databases. The Civil Service Statistics do not collect information on gender.
+[^2]: There were 60 individuals where information on sex was not provided.
