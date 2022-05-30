@@ -59,7 +59,7 @@ transfer_type <- acses2021 %>%
 
 ```
 
-Each year thousands of people join and leave the Civil Service, as well as move between organisations within the Civil Service. In the year to 31 March 2021 there were `r scales::comma(flow_totals$value[1])` entrants to the Civil Service, `r scales::comma(flow_totals$value[2])` leavers from the Civil Service, and `r scales::comma(flow_totals$value[3])` transfers within the Civil Service.
+Each year thousands of people join and leave the Civil Service, as well as move between organisations within the Civil Service. In the year to 31 March 2021 there were `r scales::comma(flow_totals$value[1])` entrants to the Civil Service, `r scales::comma(flow_totals$value[2])` leavers from the Civil Service, and `r scales::comma(flow_totals$value[3])` transfers within the Civil Service[^1].
 
 {{< details "More information on types of movement">}}
 **Entrants** are those who have joined a Civil Service organisation and were not working elsewhere in the Civil Service.
@@ -140,7 +140,7 @@ govukhugo::govuk_datatable(
 ::::
 
 ## Transfers
-In the year to 31 March 2021, the majority of transfers within the Civil Service were due to individuals moving to another role in another Civil Service Organisation (`r scales::comma(transfer_type$value[4])`, `r scales::percent(transfer_type$value[4]/flow_totals$value[3], 1)`).
+In the year to 31 March 2021, the majority of transfers within the Civil Service were due to individuals moving to another role in another Civil Service Organisation (`r scales::comma(transfer_type$value[4])`, `r scales::percent(transfer_type$value[4]/flow_totals$value[3], 0.1)`).
 
 ::::{.govuk-grid-row .data-card}
 :::{.govuk-grid-column-full-width .data-display}
@@ -196,3 +196,5 @@ govukhugo::govuk_datatable(
 
 :::
 ::::
+
+[^1]: Entrant and leaver numbers are calculated from entry and leaving dates provided as part of the ACSES data collection. The difference between them does not align precisely with the year-on-year difference between in-post headcounts. For example, there are people who left and rejoined the Civil Service more than once during a year, and people whose last day falls on the reference date (31 March) are counted as both leavers and in-post.
