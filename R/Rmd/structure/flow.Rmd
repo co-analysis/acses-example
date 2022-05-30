@@ -8,18 +8,191 @@ summary: "Headline statistics on movements into, out of and within the Civil Ser
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+flow_totals <- acses2021 %>%
+  filter((source_table == "table_40" | source_table == "table_43") & 
+           organisation == "All employees" & sex == "All employees") %>%
+  mutate(flow_type = case_when(
+    flow == "Entrants" ~ "Entrants to the Civil Service",
+    flow == "Leavers" ~ "Leavers from the Civil Service",
+    source_table == "table_43" & transfer_type == "All employees" ~ 
+      "Transfers within the Civil Service",
+    TRUE ~ NA_character_)) %>%
+  drop_na(flow_type) %>%
+  select(flow_type, value)
+
+leaving_cause <- acses2021 %>%
+  filter(source_table == "table_42" & organisation == "All employees" & 
+           leaver_cause != "All employees") %>%
+  select(leaver_cause, value) %>%
+  mutate(
+    leaver_cause = if_else(
+      str_detect(leaver_cause, "^Voluntary"),
+      "Voluntary Exit or Redundancy Scheme",
+      leaver_cause)) %>%
+  group_by(leaver_cause) %>%
+  summarise(value = sum(value)) %>%
+  mutate(
+    leaver_cause = fct_reorder(leaver_cause, value),
+    leaver_cause = fct_relevel(leaver_cause, 
+                               "Unknown Leaving Cause", "Other Leaving Cause",
+                               after = 0L),
+    fill_group = if_else(leaver_cause == "Unknown Leaving Cause", "Not reported", "Reported"),
+    chart_label = paste0(leaver_cause, " (", scales::comma(value), ")")) %>%
+  arrange(leaver_cause) %>%
+  mutate(chart_label = as_factor(chart_label))
+
+transfer_type <- acses2021 %>%
+  filter(source_table == "table_43" & organisation == "All employees" & 
+           transfer_type != "All employees") %>%
+  select(transfer_type, value) %>%
+  mutate(
+    transfer_type = fct_reorder(transfer_type, value),
+    chart_label = paste0(transfer_type, " (", scales::comma(value), ")")) %>%
+  arrange(transfer_type) %>%
+  mutate(chart_label = as_factor(chart_label))
+
 ```
 
-Each year thousands of people join and leave the Civil Service, as well as move between organisations.
+Each year thousands of people join and leave the Civil Service, as well as move between organisations within the Civil Service. In the year to 31 March 2021 there were `r scales::comma(flow_totals$value[1])` entrants to the Civil Service, `r scales::comma(flow_totals$value[2])` leavers from the Civil Service, and `r scales::comma(flow_totals$value[3])` transfers within the Civil Service.
 
+{{< details "More information on types of movement">}}
 **Entrants** are those who have joined a Civil Service organisation and were not working elsewhere in the Civil Service.
 
 **Leavers** are those who leave a Civil Service organisation and do not go on to work elswehere in the Civil Service.
 
 **Transfers** are those who move from one Civil Service organisation to another, there are three main types of transfer:
 
-- a Machinery of Government (MoG) change, where an area of work moves from the responsibility of one organisation to another;
-- a permanent transfer, where a civil servant moves to a new job in another organisation on a permanent basis; and,
-- a loan, where a civil servant moves to a new job in another organisation on a temporary basis.
+- a Machinery of Government (MoG) change, where an area of work moves from the responsibility of one organisation to another, this is recorded in the Civil Service Statistics as a "Transfer of Function Within the Civil Service";
+- a permanent transfer, where a civil servant moves to a new job in another organisation on a permanent basis, this is recorded the Civil Service Statistics as "Transfer to Another Department"; and,
+- a loan, where a civil servant moves to a new job in another organisation on a temporary basis, this is recorded in the Civil Service Statistics as either "Loan To Another Department" (when the individual leaves starts the loan and works for the host organisation) or "End of Loan" (when the individual ends the loan and returns to their home organisation).
+{{< /details >}}
 
+## Leavers
+The largest reason for leaving the Civil Service is `r tolower(leaving_cause$leaver_cause[12])` (accounting for `r scales::comma(leaving_cause$value[12])` leavers) followed by `r tolower(leaving_cause$leaver_cause[11])` (accounting for `r scales::comma(leaving_cause$value[11])` leavers), together they are responsible for `r scales::percent(sum(leaving_cause$value[12], leaving_cause$value[11])/flow_totals$value[2], 0.1)` of all leavers from the Civil Service in the year to 31 March 2021.
 
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="leaver-chart">}}
+```{r leaver_chart}
+
+leaver_plot <- ggplot(leaving_cause,
+                       aes(x = chart_label, y = value, fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Reported" = unname(govukhugo::govuk_colours["blue"]),
+      "Not reported" = unname(govukhugo::govuk_colours["dark-grey"])
+    )
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  leaver_plot,
+  width = 800,
+  height = 300,
+  alt_title = "Leavers from the Civil Service by cause",
+  alt_desc = paste(
+    "A bar chart showing the number of leavers from the Civil Service by",
+    "leaving cause. The bars are ordered by value with the largest reason",
+    "(resignationa) at the top and the smallest reason (secondment to an",
+    "organisation external to the Civil Service) at the bottom. Bars ",
+    "representing those classified as 'Other leaving cuase' or whose leaving",
+    "cause is unknown are placed after those for the smallest leaving cause."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="leaver-table">}}
+```{r leaver_table}
+
+leaver_table <- leaving_cause %>%
+  select(leaver_cause, value) %>%
+  arrange(desc(leaver_cause))
+
+govukhugo::govuk_datatable(
+    leaver_table,
+    title = "Leavers from the Civil Service by cause",
+    col_names = c("Leaving cause", "Headcount"),
+    page_length = 12,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2, digits = 0)
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
+
+## Transfers
+In the year to 31 March 2021, the majority of transfers within the Civil Service were due to individuals moving to another role in another Civil Service Organisation (`r scales::comma(transfer_type$value[4])`, `r scales::percent(transfer_type$value[4]/flow_totals$value[3], 1)`).
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="transfer-chart">}}
+```{r transfer_chart}
+
+transfer_plot <- ggplot(transfer_type,
+                       aes(x = chart_label, y = value, fill = fill_group)) +
+  geom_col(fill = govukhugo::govuk_colours["blue"]) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  transfer_plot,
+  width = 800,
+  height = 100,
+  alt_title = "Transfers within the Civil Service by type of transfer",
+  alt_desc = paste(
+    "A bar chart showing the number of transfers within the Civil Service by",
+    "transfer type. The bars are ordered by value with the largest type",
+    "(transfer to another department) at the top and the smallest reason (loan",
+    "to another department) at the bottom."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="transfer-table">}}
+```{r transfer_table}
+
+transfer_table <- transfer_type %>%
+  select(transfer_type, value) %>%
+  arrange(desc(transfer_type))
+
+govukhugo::govuk_datatable(
+    transfer_table,
+    title = "Transfers within the Civil Service by type of transfer",
+    col_names = c("Type of transfer", "Headcount"),
+    page_length = 4,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2, digits = 0)
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
