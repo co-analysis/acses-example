@@ -258,6 +258,12 @@ govukhugo::govuk_datatable(
 ::::
 
 ```{r sex_dept_setup, include=FALSE}
+
+sex_org <- acses2021 %>%
+  filter(source_table == "table_22" &
+           sex != "All employees" &
+           organisation != "All employees") 
+
 sex_dept <- acses2021 %>%
   filter(source_table == "table_22" &
            sex != "All employees" &
