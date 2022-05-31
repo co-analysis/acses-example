@@ -14,6 +14,10 @@ data_dir <- govukhugo::data_dir()
 
 acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
 
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
 sex_totals <- acses2021 %>%
   filter(source_table == "table_01" & 
            responsibility_level == "All employees" &
@@ -142,13 +146,13 @@ sex_grade <- acses2021 %>%
                  "Administrative Officers and Assistants")),
     chart_label = str_wrap(paste0(sex, " ", responsibility_level, 
                               " (", scales::comma(value), ")"), 30),
-         chart_value = if_else(sex == "Female", 
+         chart_value = if_else(sex == "Male", 
                                value, 
                                -value),
-         label_y = if_else(sex == "Female", 
+         label_y = if_else(sex == "Male", 
                                value + 3000, 
                                -(value + 3000)),
-         label_hjust = if_else(sex == "Female", 0, 1))
+         label_hjust = if_else(sex == "Male", 0, 1))
 
 sex_grade_plot <- ggplot(sex_grade,
                        aes(x = fct_rev(responsibility_level), y = chart_value, fill = sex)) +
@@ -158,8 +162,8 @@ sex_grade_plot <- ggplot(sex_grade,
              colour = govukhugo::govuk_colours["govuk-border-colour"]) +
   scale_fill_manual(
     values = c(
-      "Female" = unname(govukhugo::govuk_colours["blue"]),
-      "Male" = unname(govukhugo::govuk_colours["light-blue"])
+      "Female" = unname(govukhugo::govuk_colours["purple"]),
+      "Male" = unname(govukhugo::govuk_colours["turquoise"])
     )
   ) +
   scale_y_continuous(limits = c(-150000, 150000)) +
@@ -253,6 +257,157 @@ govukhugo::govuk_datatable(
 :::
 ::::
 
+```{r sex_dept_setup, include=FALSE}
+sex_dept <- acses2021 %>%
+  filter(source_table == "table_22" &
+           sex != "All employees" &
+           organisation != "All employees") %>%
+  left_join(group_lookup, by = "organisation") %>%
+  group_by(dept_group, sex) %>%
+  summarise(value = sum(value), .groups = "drop") %>%
+  add_count(dept_group, wt = value, name = "group_hc")
+
+top3_dept_female <- sex_dept %>%
+  filter(group_hc >= 1500 & sex == "Female") %>%
+  mutate(pc_sex = value/group_hc) %>%
+  slice_max(pc_sex, n = 3) %>%
+  mutate(dept_group = if_else(grepl("Standards in Education", dept_group), 
+                              "Ofsted", dept_group),
+         out_text = paste0(dept_group, " (", scales::percent(pc_sex, 0.1), ")"))
+
+top3_dept_male <- sex_dept %>%
+  filter(group_hc >= 1500 & sex == "Male") %>%
+  mutate(pc_sex = value/group_hc) %>%
+  slice_max(pc_sex, n = 3) %>%
+  mutate(out_text = paste0(dept_group, " (", scales::percent(pc_sex, 0.1), ")"))
+
+```
+
+The three departmental groups with the largest proportion of female staff are: `r glue::glue_collapse(top3_dept_female$out_text, sep = ", ", last = " and ")`. The three departmental groups with the largest proportion of male staff are: `r glue::glue_collapse(top3_dept_male$out_text, sep = ", ", last = " and ")`.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="sex-dept-chart">}}
+```{r sex_dept_chart}
+
+sex_dept_chart_df <- sex_dept %>%
+  mutate(
+    chart_group = case_when(
+      group_hc < 1500 ~ "Other departments and agencies",
+      grepl("Standards in Education", dept_group) ~ "Ofsted",
+      TRUE ~ dept_group),
+    chart_group = fct_reorder(chart_group, group_hc, .fun = max)
+  ) %>%
+  group_by(chart_group, sex) %>% 
+  summarise(
+    value = sum(value),
+    .groups = "drop") %>%
+  group_by(chart_group) %>%
+  mutate(
+    pc_sex = value / sum(value)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    chart_label = scales::percent(pc_sex, 0.1)
+  )
+
+sex_dept_plot <- ggplot(sex_dept_chart_df,
+                       aes(x = chart_group, y = value, fill = sex)) +
+  geom_col(position = position_fill(reverse = TRUE)) +
+  geom_text(aes(label = chart_label), position = position_fill(vjust = 0.5, TRUE),
+            colour = "#ffffff") +
+  scale_fill_manual(
+    values = c(
+      "Female" = unname(govukhugo::govuk_colours["purple"]),
+      "Male" = unname(govukhugo::govuk_colours["turquoise"])
+    ),
+    name = "Sex"
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top"
+  )
+
+govukhugo::render_svg(
+  sex_dept_plot,
+  width = 800,
+  height = 600,
+  alt_title = "Civil Service headcount by sex and departmental group",
+  alt_desc = paste(
+    "A stacked bar chart showing Civil Service headcount by sex and",
+    "departmental group. Bars represent the proportion of civil servants in",
+    "each departmental group that are male (the bar starting on the left) and",
+    "female (the bar starting on the right). The departmental groups are",
+    "arranged by overall headcount, with the largest departmental group",
+    "(Work and Pensions) at the top and the smallest departmental group (Ofsted)",
+    "at the bottom. Departmental groups with a headcount of less than 1,500 have",
+    "been grouped together, the bars for this group are shown after those for",
+    "the smallest group."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< small >}}Departmental groups with a headcount of less than 1,500 staff have been grouped together.{{< /small >}}
+
+{{< /tab >}}
+{{< tab title="Departmental groups table" heading="hide" ref="sex-dept-table">}}
+```{r sex_dept_table}
+
+sex_dept_table <- sex_dept %>%
+  group_by(dept_group) %>%
+  mutate(pc_sex = value/sum(value)) %>%
+  ungroup() %>%
+  arrange(desc(group_hc), dept_group, sex) %>%
+  select(dept_group, sex, value, pc_sex)
+
+govukhugo::govuk_datatable(
+    sex_dept_table,
+    title = "Civil Service headcount by departmental group and sex",
+    col_names = c("Departmental group", "Sex", "Headcount", "Percentage of sex"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+
+```
+{{< /tab >}}
+{{< tab title="Organisations table" heading="hide" ref="sex-organisation-table">}}
+```{r sex_organisation_table}
+
+sex_org_table <- sex_org %>%
+  left_join(group_lookup, by = "organisation") %>%
+  group_by(organisation) %>%
+  mutate(
+    org_hc = sum(value),
+    pc_sex = value/sum(value)
+  ) %>%
+  ungroup() %>%
+  arrange(dept_group, organisation, sex) %>%
+  select(dept_group, organisation, sex, value, pc_sex)
+
+govukhugo::govuk_datatable(
+    sex_org_table,
+    title = "Civil Service headcount by organisation and sex",
+    col_names = c("Departmental group", "Organisation", "Sex", "Headcount", "Percentage of sex"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 4, digits = 0) %>%
+  DT::formatPercentage(columns = 5, digits = 1)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+
+:::
+::::
 
 [^1]: The Civil Service Statistics records sex as either Male or Female, this is drawn from data provided in organisations' HR systems and databases. The Civil Service Statistics do not collect information on gender.
 [^2]: There were 60 individuals where information on sex was not provided.
