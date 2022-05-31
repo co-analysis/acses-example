@@ -8,6 +8,269 @@ summary: "Headline statistics on civil servants by salary band"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+gbp_format <- scales::dollar_format(accuracy = 1, prefix = "£")
+
+salary_band_all <- acses2021 %>%
+  filter(source_table == "table_06" & 
+           working_pattern == "All employees" &
+           sex == "All employees") %>%
+  select(salary_band, value) %>%
+  mutate(valid = if_else(salary_band == "Not reported" | salary_band == "All employees", NA_real_, value),
+         pc = valid/sum(valid, na.rm = TRUE),
+         cpc = cumsum(pc),
+         icpc = 1-cpc,
+         band_lower = as.numeric(
+           str_remove_all(
+             str_replace(salary_band, "^[£](\\d+),(\\d+).*$", "\\1\\2"),
+             "\\D")
+         ),
+         band_upper = as.numeric(
+           str_remove_all(
+             str_replace(salary_band, ".* - (\\d+),(\\d+)", "\\1\\2"),
+             "\\D")
+         ),
+         salary_band = fct_reorder(salary_band, band_lower),
+         salary_band = fct_relevel(salary_band, "Not reported", "All employees", after = 0L)
+         )
+
+salary_stats <- acses2021 %>%
+  filter(source_table == "table_06a" & 
+           working_pattern == "All employees" &
+           sex == "All employees") %>%
+  select(salary_band, value_type, value)
+
+salary_stats_out <- purrr::set_names(
+  x  = gbp_format(salary_stats$value),
+  nm = salary_stats$value_type
+)
+
+lowest_50 <- salary_band_all %>%
+  filter(cpc >= 0.5 & icpc <= 0.5) %>%
+  slice_min(cpc)
+
+top_10 <- salary_band_all %>%
+  filter(cpc >= 0.9 & icpc <= 0.1) %>%
+  slice_min(cpc)
+
+high_earners <- acses2021 %>%
+  filter(source_table == "table_35") %>%
+  select(salary_band, value) %>%
+  arrange(value)
+
 ```
 
-Holding page
+As at 31 March 2021, and `r scales::percent(lowest_50$cpc, 0.1)` of civil servants earnt `r gbp_format(lowest_50$band_upper)` or less, while `r scales::percent(top_10$icpc, 0.1)` earnt `r gbp_format(top_10$band_lower)` or more. There are `r scales::comma(high_earners$value[1], 1)` civil servants who earnt more than £100,000, of these `r scales::comma(high_earners$value[2], 1)` earnt more than £150,000 and `r scales::comma(high_earners$value[3], 1)` who earnt more than £200,000.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="salary-chart">}}
+```{r salary_chart}
+
+salary_chart_df <- salary_band_all %>%
+  filter(salary_band != "All employees") %>%
+  select(salary_band, value) %>%
+  mutate(
+    chart_label = paste0(salary_band, " (", scales::comma(value), ")"),
+    fill_group = if_else(salary_band == "Not reported", "Not reported", "Reported"),
+    chart_label = fct_reorder(chart_label, as.numeric(salary_band))
+  )
+  
+salary_plot <- ggplot(salary_chart_df,
+                       aes(x = chart_label, y = value, fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Reported" = unname(govukhugo::govuk_colours["blue"]),
+      "Not reported" = unname(govukhugo::govuk_colours["dark-grey"])
+    )
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  salary_plot,
+  width = 800,
+  height = 450,
+  alt_title = "Civil Service headcount by salary band",
+  alt_desc = paste(
+    "A bar chart showing the headcount of the Civil Service by salary band.",
+    "The first bar is for those earning £150,000 or more per year, each",
+    "subsequent bar shows the number of staff earning in bands of £5,000 until",
+    "a bar for those earing £20,000 or less per year. The final bar shows the number",
+    "whose salary was not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="salary-table">}}
+```{r salary_table}
+
+salary_band_table <- salary_band_all %>%
+  select(salary_band, value, pc)
+
+govukhugo::govuk_datatable(
+    salary_band_table,
+    title = "Civil Service headcount by salary band",
+    col_names = c("Salary band", "Headcount", "Percent of known salary"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 2, digits = 0) %>%
+  DT::formatPercentage(columns = 3, digits = 1)
+
+```
+{{< /tab >}}
+{{< tab title="High earners" heading="hide" ref="high-earners-table">}}
+```{r high_earners_table}
+
+high_earners %>%
+  mutate(value = scales::comma(value, 1)) %>%
+  knitr::kable(
+    output = "html",
+    col.names = c("Salary band", "Headcount"),
+    align = "lr",
+    caption = "Civil Service headcount in high earning salary bands"
+  )
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+The median salary for all civil servants is `r salary_stats_out["median"]`, while the mean salary is `r salary_stats_out["mean"]`.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="salary-stats-chart">}}
+```{r salary_stats_chart}
+
+salary_stats_df <- acses2021 %>%
+  filter(source_table == "table_06a",
+         sex == "All employees") %>%
+  select(working_pattern, value_type, value) %>%
+  mutate(
+    working_pattern = factor(working_pattern, 
+                             levels = c("Part-time", "Full-time", "All employees")),
+    label = paste(
+      if_else(
+        str_detect(value_type, "_"),
+        toupper(str_replace(value_type, "^(\\w{1})\\w+_(\\w{1})\\w+$", "\\1\\2")),
+        str_to_title(value_type)
+      ),
+      gbp_format(value), sep = ": "
+    ),
+    label = str_wrap(label, 5),
+    label_adjust = if_else(value_type == "lower_quartile" | value_type == "mean",
+                           as.numeric(working_pattern) + 0.25,
+                           as.numeric(working_pattern) - 0.25)
+  )
+
+salary_lines <- salary_stats_df %>%
+  filter(value_type == "lower_quartile" | value_type == "upper_quartile") %>%
+  select(working_pattern, value_type, value) %>%
+  pivot_wider(names_from = value_type, values_from = value)
+
+salary_points <- salary_stats_df %>%
+  filter(value_type == "mean" | value_type == "median")
+  
+salary_stats_plot <- ggplot(salary_stats_df, 
+                            aes(x = working_pattern)) +
+  geom_linerange(aes(ymin = 20000, ymax = 50000),
+                 size = 0.25,
+                 colour = govukhugo::govuk_colours["dark-grey"]) +
+  geom_linerange(data = salary_lines,
+                aes(ymin = lower_quartile, ymax = upper_quartile),
+                size = 8, 
+                colour = govukhugo::govuk_colours["blue"]) +
+  geom_point(data = salary_points,
+             aes(y = value, shape = value_type),
+             colour = govukhugo::govuk_colours["white"],
+             size = 4) +
+  geom_text(aes(label = label, 
+                y = value,
+                x = label_adjust),
+            size = 3.5) +
+  scale_shape_manual(
+    values = c("median" = "circle",
+               "mean" = "square")
+  ) +
+  scale_y_continuous(
+    breaks = seq(20000, 50000, 5000),
+    labels = c(gbp_format(20000), rep("", 5), gbp_format(50000))
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    axis.ticks.x = element_line(
+      colour = govukhugo::govuk_colours["govuk-border-colour"]
+      ),
+    axis.ticks.length.x = unit(4, "pt"),
+    axis.text.x = element_text(
+      size = 10, hjust = 0.5, margin = margin(r = 3),
+      colour = govukhugo::govuk_colours["govuk-secondary-text-colour"]),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "none"
+  )
+
+govukhugo::render_svg(
+  salary_stats_plot,
+  width = 800,
+  height = 400,
+  alt_title = "Salary statistics by working pattern",
+  alt_desc = paste(
+    "A plot showing summary statistics of civil servant salaries by working",
+    "pattern. Three rows show the statistics for all employees, full-time",
+    "employees and part-time employees. Each row has a thin grey horizontal", 
+    "line representing a range from £20,000 to £50,000, a thick blue horizontal",
+    "line is overlaid showing the range from the lower quartile to upper",
+    "quartile of salaries. Finally, two points are added to represent the median",
+    "salary (a circle) and mean salary (a square)."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="stats-table">}}
+```{r stats_table}
+
+salary_stats_table <- salary_stats_df %>%
+  select(working_pattern, value_type, value) %>%
+  pivot_wider(names_from = value_type, values_from = value) %>%
+  select(working_pattern, lower_quartile, median, mean, upper_quartile) %>%
+  arrange(desc(working_pattern))
+
+govukhugo::govuk_datatable(
+    salary_stats_table,
+    title = "Salary statistics by working pattern",
+    col_names = c("Working pattern", "Lower quartile salary", 
+                  "Median salary", "Mean salary", "Upper quartile salary"),
+    page_length = 12,
+    search = FALSE
+  ) %>%
+  DT::formatCurrency(columns = 2:5, currency = "£", digits = 0)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
