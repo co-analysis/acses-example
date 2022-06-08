@@ -5,6 +5,7 @@ R/Rmd/diversity/ethnicity.Rmd: 557a8ebf21e824361b6ca6981ccf2c74
 R/Rmd/diversity/religion_belief.Rmd: ea73e79e1d5987c910a52b18d244cdb1
 R/Rmd/diversity/sex.Rmd: acb030fa8a830c69acc4b4c0be7d5254
 R/Rmd/diversity/sexual_orientation.Rmd: e8a8b830aed21073092d370bef615627
+R/Rmd/location/_index.Rmd: 9849e5537cdb7fd225b963ceecde3252
 R/Rmd/location/country_region.Rmd: 838306b08be70f279891c4ecb2dbdf5a
 R/Rmd/location/diversity.Rmd: c2bafbec25c2b7167a0059f04a6df4f9
 R/Rmd/location/local_areas.Rmd: 2ae1ef15e4d73777ffaa35d031070c94

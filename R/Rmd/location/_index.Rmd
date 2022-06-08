@@ -1,0 +1,101 @@
+---
+title: "Location"
+date: 2021-01-01
+section: location
+listpages: false
+weight: 300
+summary: "Civil servants by location"
+---
+
+While popular perception is that civil servants all work in Whitehall, only one in five civil servants (20.9%) work in London, civil servants work in over 2,500 individual locations across the UK.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+data_dir <- govukhugo::data_dir()
+
+acses_postcodes <- read_csv(
+  file.path(data_dir, "acses2021_postcodes.csv")
+)
+
+acses_nspl <- read_csv(
+  file.path(data_dir, "acses_nspl.csv")
+) %>%
+  sf::st_as_sf(
+    coords = c("long", "lat"),
+    crs = sf::st_crs(4326))
+
+acses_postcode_geo <- left_join(
+  acses_postcodes,
+  acses_nspl,
+  by = "postcode"
+)
+
+uk_countries_json <- "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_December_2021_UK_BUC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
+
+uk_background <- sf::st_read(uk_countries_json)
+
+all_emp_postcode <- acses_postcode_geo %>%
+  filter(organisation == "All employees" & 
+           responsibility_level == "All employees" & !is.na(pcds) &
+           value != 0) %>%
+  mutate(fill_value = log10(value)) %>%
+  arrange(value)
+
+```
+
+
+::::{.govuk-grid-row}
+:::{.govuk-grid-column-one-half}
+In this section you can explore statistics about where civil servants work:
+
+- civil servants by [country and region](country_region/),
+- civil servants by [local areas](nuts3/)
+- regional distribution by [organisation and grade](organisation_grade/)
+- regional distribution by [profession and function](profession_function/)
+- regional distribution by [key diversity characteristics](diversity/)
+:::
+
+:::{.govuk-grid-column-one-half}
+```{r postcode_chart}
+
+postcode_plot <- ggplot(uk_background) +
+  geom_sf(
+    fill = govukhugo::govuk_colours["mid-grey"], 
+    colour = govukhugo::govuk_colours["mid-grey"],
+    size = 0.2
+  ) +
+  geom_sf(
+    data = all_emp_postcode, 
+    aes(fill = fill_value, geometry = geometry),
+    shape = 21,
+    colour = govukhugo::govuk_colours["chart-white"],
+    stroke = 0.15,
+    alpha = 0.5,
+    size = 1.5,
+    show.legend = FALSE
+  ) +
+  scale_fill_gradientn(colours = govukhugo::govuk_palette("blues")[3:1]) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(
+      fill = govukhugo::govuk_colours["light-grey"],
+      colour = NA
+    )
+  )
+
+govukhugo::render_svg(
+  postcode_plot,
+  width = 300,
+  height = 400,
+  alt_title = "Map of Civil Service locations in the UK",
+  alt_desc = paste(
+    "An outline map of the United Kingdom with points showing all the",
+    "postcode locations where civil servants are recorded as working as",
+    "at 31 March 2021."
+  )
+)
+
+```
+:::
+::::
