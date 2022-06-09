@@ -47,27 +47,44 @@ sex_working_pattern <- acses2021 %>%
            sex != "All employees" &
            working_pattern != "All employees") %>%
   select(sex, working_pattern, value) %>%
-  mutate(chart_label = str_wrap(paste0(sex, " ", working_pattern, 
-                              " (", scales::comma(value), ")"), 20),
-         chart_value = if_else(working_pattern == "Part-time", 
-                               -value, 
-                               value),
-         label_y = if_else(working_pattern == "Part-time", 
-                               -(value + 3000), 
-                               value + 3000),
-         label_hjust = if_else(working_pattern == "Part-time", 1, 0))
+  mutate(
+    chart_label = str_wrap(paste0(sex, " ", working_pattern, 
+                                  " (", scales::comma(value), ")"), 20),
+    chart_value = if_else(working_pattern == "Part-time", 
+                          -value, 
+                          value),
+    label_y = if_else(working_pattern == "Part-time", 
+                      -(value + 3000), 
+                      value + 3000),
+    label_hjust = if_else(working_pattern == "Part-time", 1, 0),
+    fill_group = case_when(
+      sex == "Female" & working_pattern == "Full-time" ~ "FFT",
+      sex == "Female" & working_pattern == "Part-time" ~ "FPT",
+      sex == "Male" & working_pattern == "Full-time" ~ "MFT",
+      sex == "Male" & working_pattern == "Part-time" ~ "MPT"
+    )
+  )
 
 sex_pattern_plot <- ggplot(sex_working_pattern,
-                       aes(x = fct_rev(sex), y = chart_value, fill = working_pattern)) +
+                       aes(x = fct_rev(sex), y = chart_value,
+                           fill = fill_group)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(y = label_y, label = chart_label, hjust = label_hjust)) +
   geom_hline(yintercept = 0, size = 1, 
              colour = govukhugo::govuk_colours["govuk-border-colour"]) +
   scale_fill_manual(
     values = c(
-      "Full-time" = unname(govukhugo::govuk_colours["blue"]),
-      "Part-time" = unname(govukhugo::govuk_colours["light-blue"])
-    )
+      "FFT" = unname(govukhugo::govuk_colours["purple"]),
+      "FPT" = scales::gradient_n_pal(c(
+        govukhugo::govuk_colours["purple"], 
+        govukhugo::govuk_colours["chart-white"]
+        ), values = c(1, 0))(2/3),
+      "MFT" = unname(govukhugo::govuk_colours["turquoise"]),
+      "MPT" = scales::gradient_n_pal(c(
+        govukhugo::govuk_colours["turquoise"], 
+        govukhugo::govuk_colours["chart-white"]
+        ), values = c(1, 0))(2/3)
+)
   ) +
   scale_y_continuous(limits = c(-150000, 250000)) +
   coord_flip() +
