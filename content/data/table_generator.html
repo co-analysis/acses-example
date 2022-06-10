@@ -8,9 +8,9 @@ rmarkdown: true
 
 <p class="govuk-body">From this page you can filter the raw statistical tables that make up the Civil Service
     Statistics.</p>
-<p class="govuk-body">Use the filters to create your own subset of the machine readable tables. Please note this results
-    in a wide table that you will need to scroll horizontally to view in full. You can copy the table to the clipboard
-    or download your select as a CSV.</p>
+<p class="govuk-body">Use the filters to create your own subset of the machine readable tables. Please note this may
+    results in a wide table that you will need to scroll horizontally to view in full. You can copy the table to the
+    clipboard or download your selection as a CSV file.</p>
 
 <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
@@ -144,8 +144,8 @@ rmarkdown: true
             </select>
         </div>
         <div class="govuk-form-group">
-        <button href="#" role="button" draggable="false" class="govuk-button" data-module="govuk-button"
-            id="add_category" style="display:none">Add category to filters</button>
+            <button href="#" role="button" draggable="false" class="govuk-button" data-module="govuk-button"
+                id="add_category" style="display:none">Add category to filters</button>
         </div>
     </fieldset>
 
@@ -297,6 +297,7 @@ rmarkdown: true
     }
 
     let variable_labels = {
+        source_table: "Source table",
         age_band: "Age band",
         appointment_status: "Appointment status",
         country: "Country",
@@ -318,6 +319,10 @@ rmarkdown: true
         transfer_type: "Transfer type",
         uk_region: "UK region",
         working_pattern: "Working pattern",
+        note: "Note",
+        value_class: "Value class",
+        value_type: "Value type",
+        value: "Value"
     }
 
     let variable_categories = {
@@ -494,9 +499,9 @@ rmarkdown: true
     function select_table() {
 
         reset_categories()
-        
+
         var table_selected = $("#filter_source_table").val();
-        
+
         if ($("#filter_source_table option:selected").val() == "null") {
             $("#generate_table").hide();
             $("#filter_variable_group").hide();
@@ -515,7 +520,7 @@ rmarkdown: true
 
         let variables_html = "<option value='null'>Please select a category</option>";
 
-        table_variables[table_selected].forEach(function(variable){
+        table_variables[table_selected].forEach(function (variable) {
             variables_html += "<option value='" + variable + "'>" + variable_labels[variable] + "</option>";
         });
 
@@ -617,11 +622,26 @@ rmarkdown: true
             return;
         };
 
+        var output_vars = ["source_table", "note", "value_class", "value_type", "value"];
+
+        table_variables[$("#filter_source_table option:selected").val()].forEach(function (variable) {
+            output_vars.push(variable);
+        });
+
+        filter_res.forEach(function (row) {
+            Object.keys(row).forEach(function (variable) {
+                if (!output_vars.includes(variable)) {
+                    delete row[variable]
+                }
+            });
+        });
+
         $("#filter_results").hide();
         $("#filter_group").removeClass("govuk-form-group--error");
         $("#no_filters_msg").hide();
 
-        let table_meta_html = "<strong class='govuk-!-font-weight-bold'>" + $("#filter_source_table option:selected").text() + "</strong>";
+        let table_meta_html = "<strong class='govuk-!-font-weight-bold'>" + $("#filter_source_table option:selected")
+            .text() + "</strong>";
         let categories_meta_html = ""
 
         if (number_of_selections == 0) {
@@ -630,7 +650,8 @@ rmarkdown: true
             categories_meta_html = "<strong class='govuk-!-font-weight-bold'>Filters applied:</strong> "
             Object.keys(category_selections).forEach(function (variable) {
                 if (category_selections[variable] != "") {
-                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable] + "; ";
+                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable] +
+                        "; ";
                 }
             });
             categories_meta_html = categories_meta_html.substring(0, categories_meta_html.length - 2) + ".";
@@ -640,12 +661,8 @@ rmarkdown: true
 
         /* Generate table header */
         table_html += "<thead class='govuk-table__head'><tr class='govuk-table__row'>";
-        csv_columns.forEach(function (col_head) {
-            table_html += "<th scope='col' class='govuk-table__header'>" +
-                col_head.split('_').map(function (word) {
-                    return (word.charAt(0).toUpperCase() + word.slice(1));
-                }).join(' ').replace("Uk ", "UK ").replace(" Of ", " of ").replace(" Or ", " or ").replace(
-                    "Nuts2", "NUTS 2").replace("Nuts3", "NUTS3") +
+        Object.keys(filter_res[0]).forEach(function (variable) {
+            table_html += "<th scope='col' class='govuk-table__header'>" + variable_labels[variable] +
                 "</th>";
         });
         table_html += "</tr></thead>";
@@ -664,7 +681,7 @@ rmarkdown: true
         table_html += "</table>";
 
         var dt_dom = "";
-        if (filter_res.length < 11){
+        if (filter_res.length < 11) {
             dt_dom = "<'govuk_dt_table't><'govuk_dt_nav'iB>";
         } else {
             dt_dom = "<'govuk_dt_table't><'govuk_dt_nav'piB>";
@@ -678,10 +695,12 @@ rmarkdown: true
             dom: dt_dom,
             buttons: [{
                     extend: "copy",
-                    title: function(){
-                        var txt = "Civil Service Statistics 2021\r\n" + $("#filter_source_table option:selected").text();
+                    title: function () {
+                        var txt = "Civil Service Statistics 2021\r\n" + $(
+                            "#filter_source_table option:selected").text();
                         if (number_of_selections > 0) {
-                            txt += "\r\n" + categories_meta_html.substring(67, categories_meta_html.length - 1);
+                            txt += "\r\n" + categories_meta_html.substring(67, categories_meta_html
+                                .length - 1);
                         }
                         return (txt)
                     }
@@ -689,18 +708,25 @@ rmarkdown: true
                 {
                     extend: "csv",
                     text: "Download",
-                    filename: "civilservicestatistics2021_"+ $("#filter_source_table option:selected").val() +
+                    filename: "civilservicestatistics2021_" + $("#filter_source_table option:selected")
+                        .val() +
                         "_filtered" + Date.now() + ".csv"
                 }
             ],
-            "columnDefs": [{
-                "type": "num",
-                "targets": 25,
-                render: DataTable.render.number(",")
-
-            }]
+            "columnDefs": [
+                {
+                    type: "num",
+                    targets: Object.keys(filter_res[0]).length - 1,
+                    render: DataTable.render.number(","),
+                    className: "govuk_dt_numeric_cell"
+                },
+                { 
+                    visible: false,
+                    targets: 0
+                }
+            ]
         });
-        
+
         govuk_DT_styling();
         document.getElementById("filter_results").scrollIntoView();
         $("#filter_results").focus()
