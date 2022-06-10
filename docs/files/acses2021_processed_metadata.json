@@ -1,0 +1,294 @@
+{
+    "@context": ["http://www.w3.org/ns/csvw", {"@language": "en"}],
+    "url": "https://co-analysis.github.io/acses-example/files/acses2021_processed.csv",
+    "tables" : [{
+        "tableSchema": {
+            "columns": [
+                {
+                    "name": "source_table",
+                    "title": "Source table",
+                    "description": "The statistical table this value is published in",
+                    "datatype": "string"
+                },
+                {
+                    "name": "age_band",
+                    "title": "Age band",
+                    "description": "Age in 5 year bands",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["16-19", "20-29", "30-39", "40-49", "50-59", "60-64", "65 & over", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "appointment_status",
+                    "title": "Age band",
+                    "description": "Permanent or temporary appointment",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Permanent", "Temporary", "All employees"]
+                    }
+                },
+                {
+                    "name": "country",
+                    "title": "Country",
+                    "description": "UK country of workplace",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["England", "Wales", "Scotland", "Northern Ireland", "Overseas", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "disability",
+                    "title": "Disability",
+                    "description": "Disability status",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Disabled", "Non-disabled", "Not declared", "Not reported", "All declared", "All employees"]
+                    }
+                },
+                {
+                    "name": "ethnicity",
+                    "title": "Ethnicity",
+                    "description": "Disability status",
+                    "datatype": {
+                        "base": "string"
+                        "values": ["White", "Asian", "Black", "Chinese", "Mixed", "Other", "Not declared", "Not reported", "All declared", "Ethnic minority", "Other ethnicity", "Ethnicy minority", "All employees"]
+                    }
+                },
+                {
+                    "name": "flow",
+                    "title": "Flow",
+                    "description": "Whether an entrant or leaver",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Entrants", "Leavers", "All employees"]
+                    }
+                },
+                {
+                    "name": "function_of_post",
+                    "title": "Function of post",
+                    "description": "Function of post",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Analysis", "Commercial", "Communications", "Counter Fraud", "Debt", "Digital, Data & Technology", "Finance", "Grants Management", "Human Resources", "Internal Audit", "Legal", "Project Delivery", "Property", "Security", "No function", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "leaver_cause",
+                    "title": "Leaver cause",
+                    "description": "The reason for leving the Civil Service",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Retirement", "Death in service", "Resignation", "End Of Casual, Period, Conditional Or Provisional Appointment", "Dismissal", "Transfer Of Function To Private Sector", "Secondment To Organisation External To Civil Service", "Transfer To Non-Civil Service Public Sector", "Voluntary Exit Scheme: With Payment", "Voluntary Exit Scheme: With An Unreduced Pension", "Voluntary Exit Scheme: Terms Not Recorded", "Voluntary Redundancy Scheme: With Payment", "Voluntary Redundancy Scheme: With An Unreduced Pension", "Voluntary Redundancy Scheme: Terms Not Recorded", "Compulsory Redundancy Scheme", "Other Leaving Cause", "Unknown Leaving Cause", "All employees"]
+                    }
+                },
+                {
+                    "name": "national_identity",
+                    "title": "National identity",
+                    "description": "National identity",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["British or Mixed British", "English", "Northern Irish", "Scottish", "Welsh", "Other national identity", "Not declared", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "national_identity",
+                    "title": "National identity",
+                    "description": "National identity",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["British or Mixed British", "English", "Northern Irish", "Scottish", "Welsh", "Other national identity", "Not declared", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "nuts2",
+                    "title": "NUTS2",
+                    "description": "NUTS2 area grouping",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Tees Valley and Durham", "Northumberland and Tyne and Wear", "Cumbria", "Greater Manchester", "Lancashire", "Cheshire", "Merseyside", "East Yorkshire and Northern Lincolnshire", "North Yorkshire", "South Yorkshire", "West Yorkshire", "Derbyshire and Nottinghamshire", "Leicestershire, Rutland and Northamptonshire", "Lincolnshire", "Herefordshire, Worcestershire and Warwickshire", "Shropshire and Staffordshire", "West Midlands", "East Anglia", "Bedfordshire and Hertfordshire", "Essex", "Inner London - West", "Inner London - East", "Outer London - East and North East", "Outer London - South", "Outer London - West and North West", "Berkshire, Buckinghamshire and Oxfordshire", "Surrey, East and West Sussex", "Hampshire and Isle of Wight", "Kent", "Gloucestershire, Wiltshire and Bath/Bristol area", "Dorset and Somerset", "Cornwall and Isles of Scilly", "Devon", "West Wales and The Valleys", "East Wales", "North Eastern Scotland", "Highlands and Islands", "Eastern Scotland", "West Central Scotland", "Southern Scotland", "Northern Ireland", "Overseas", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "nuts3",
+                    "title": "NUTS3",
+                    "description": "NUTS3 area grouping",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Hartlepool and Stockton-on-Tees", "South Teesside", "Darlington", "Durham CC", "Northumberland", "Tyneside", "Sunderland", "West Cumbria", "East Cumbria", "Manchester", "Greater Manchester South West", "Greater Manchester South East", "Greater Manchester North West", "Greater Manchester North East", "Blackburn with Darwen", "Blackpool", "Lancaster and Wyre", "Mid Lancashire", "East Lancashire", "Chorley and West Lancashire", "Warrington", "Cheshire East", "Cheshire West and Chester", "East Merseyside", "Liverpool", "Sefton", "Wirral", "Kingston upon Hull, City of", "East Riding of Yorkshire", "North and North East Lincolnshire", "York", "North Yorkshire CC", "Barnsley, Doncaster and Rotherham", "Sheffield", "Bradford", "Leeds", "Calderdale and Kirklees", "Wakefield", "Derby", "East Derbyshire", "South and West Derbyshire", "Nottingham", "North Nottinghamshire", "South Nottinghamshire", "Leicester", "Leicestershire CC and Rutland", "West Northamptonshire", "North Northamptonshire", "Lincolnshire", "Herefordshire, County of", "Worcestershire", "Warwickshire", "Telford and Wrekin", "Shropshire CC", "Stoke-on-Trent", "Staffordshire CC", "Birmingham", "Solihull", "Coventry", "Dudley", "Sandwell", "Walsall", "Wolverhampton", "Peterborough", "Cambridgeshire CC", "Suffolk", "Norwich and East Norfolk", "North and West Norfolk", "Breckland and South Norfolk", "Luton", "Hertfordshire", "Bedford", "Central Bedfordshire", "Southend-on-Sea", "Thurrock", "Essex Haven Gateway", "West Essex", "Heart of Essex", "Essex Thames Gateway", "Camden and City of London", "Westminster", "Kensington & Chelsea and Hammersmith & Fulham", "Wandsworth", "Hackney and Newham", "Tower Hamlets", "Haringey and Islington", "Lewisham and Southwark", "Lambeth", "Bexley and Greenwich", "Barking & Dagenham and Havering", "Redbridge and Waltham Forest", "Enfield", "Bromley", "Croydon", "Merton, Kingston upon Thames and Sutton", "Barnet", "Brent", "Ealing", "Harrow and Hillingdon", "Hounslow and Richmond upon Thames", "Berkshire", "Milton Keynes", "Buckinghamshire CC", "Oxfordshire", "Brighton and Hove", "East Sussex CC", "West Surrey", "East Surrey", "West Sussex (South West)", "West Sussex (North East)", "Portsmouth", "Southampton", "Isle of Wight", "South Hampshire", "Central Hampshire", "North Hampshire", "Medway", "Kent Thames Gateway", "East Kent", "Mid Kent", "West Kent", "Bristol, City of", "Bath and North East Somerset, North Somerset and South Gloucestershire", "Gloucestershire", "Swindon", "Wiltshire", "Bournemouth and Poole", "Dorset CC", "Somerset", "Cornwall and Isles of Scilly", "Plymouth", "Torbay", "Devon CC", "Isle of Anglesey", "Gwynedd", "Conwy and Denbighshire", "South West Wales", "Central Valleys", "Gwent Valleys", "Bridgend and Neath Port Talbot", "Swansea", "Monmouthshire and Newport", "Cardiff and Vale of Glamorgan", "Flintshire and Wrexham", "Powys", "Aberdeen City and Aberdeenshire", "Caithness and Sutherland and Ross and Cromarty", "Inverness and Nairn and Moray, Badenoch and Strathspey", "Lochaber, Skye and Lochalsh, Arran and Cumbrae and Argyll and Bute", "Na h-Eileanan Siar", "Orkney Islands", "Shetland Islands", "Angus and Dundee City", "Clackmannanshire and Fife", "East Lothian and Midlothian", "City of Edinburgh", "Falkirk", "Perth and Kinross and Stirling", "West Lothian", "East Dunbartonshire, West Dunbartonshire and Helensburgh and Lomond", "Glasgow City", "Inverclyde, East Renfrewshire and Renfrewshire", "North Lanarkshire", "Scottish Borders", "Dumfries and Galloway", "East Ayrshire and North Ayrshire mainland", "South Ayrshire", "South Lanarkshire", "Belfast", "Armagh City, Banbridge and Craigavon", "Newry, Mourne and Down", "Ards and North Down", "Derry City and Strabane", "Mid Ulster", "Causeway Coast and Glens", "Antrim and Newtownabbey", "Lisburn and Castlereagh", "Mid and East Antrim", "Fermanagh and Omagh", "Overseas", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "organisation",
+                    "title": "Organisation",
+                    "description": "Employing organisation (i.e. department or agency)",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Attorney General's Office", "Crown Prosecution Service", "Crown Prosecution Service Inspectorate", "Government Legal Department", "Serious Fraud Office", "Department for Business, Energy and Industrial Strategy (excl. agencies)", "Advisory, Conciliation and Arbitration Service", "Companies House", "Insolvency Service", "Met Office", "UK Intellectual Property Office", "UK Space Agency", "Cabinet Office (excl. agencies)", "Crown Commercial Service", "Government Property Agency", "Government Actuary's Department", "National Savings and Investments", "Charity Commission", "Ministry of Housing, Communities and Local Government (excl. agencies)", "Planning Inspectorate", "Queen Elizabeth II Centre", "Competition and Markets Authority", "Department for Digital, Culture, Media and Sport", "Ministry of Defence (excl. agencies)", "Defence Science and Technology Laboratory", "Defence Electronics and Components Agency", "Defence Equipment and Support", "Royal Fleet Auxiliary", "Submarine Delivery Agency", "UK Hydrographic Office", "Department for International Trade", "Department for Education (excl. agencies)", "Education and Skills Funding Agency", "Institute for Apprenticeships and Technical Education", "Standards and Testing Agency", "Teaching Regulation Agency", "Department for Environment, Food and Rural Affairs (excl. agencies)", "Animal and Plant Health Agency", "Centre for Environment, Fisheries and Aquaculture Science", "Rural Payments Agency", "Veterinary Medicines Directorate", "ESTYN", "Food Standards Agency", "Foreign, Commonwealth and Development Office (excl. agencies)", "FCDO Services", "Wilton Park", "Department of Health and Social Care (excl. agencies)", "Medicines and Healthcare Products Regulatory Agency", "Public Health England", "HM Land Registry", "HM Revenue and Customs (excl. agencies)", "Valuation Office Agency", "HM Treasury (excl. agencies)", "Debt Management Office", "Government Internal Audit Agency", "National Infrastructure Commission", "Office for Budget Responsibility", "Home Office (incl. agencies)", "Ministry of Justice (excl. agencies)", "Criminal Injuries Compensation Authority", "HM Courts and Tribunals Service", "Legal Aid Agency", "HM Prison and Probation Service", "Office of the Public Guardian", "The National Archives", "National Crime Agency", "Northern Ireland Office", "Office for Standards in Education, Children's Services and Skills", "Office of Gas and Electricity Markets", "Office of Rail and Road", "Office of Qualifications and Examinations Regulation", "Scotland Office (incl. Office of the Advocate General for Scotland)", "Scottish Government (excl. agencies)", "Accountant in Bankruptcy", "Crown Office and Procurator Fiscal Service", "Disclosure Scotland", "Education Scotland", "Food Standards Scotland", "Forestry and Land Scotland", "National Records of Scotland", "Office of the Scottish Charity Regulator", "Registers of Scotland", "Revenue Scotland", "Scottish Courts and Tribunals Service", "Scottish Fiscal Commission", "Scottish Forestry", "Scottish Housing Regulator", "Scottish Prison Service", "Scottish Public Pensions Agency", "Social Security Scotland", "Student Awards Agency for Scotland", "Transport Scotland", "Department for Transport (excl. agencies)", "Driver and Vehicle Licensing Agency", "Driver and Vehicle Standards Agency", "Maritime and Coastguard Agency", "Vehicle Certification Agency", "United Kingdom Statistics Authority", "UK Export Finance", "UK Supreme Court", "Wales Office", "Water Services Regulation Authority", "Welsh Government (excl. agencies)", "Welsh Revenue Authority", "Department for Work and Pensions (excl. agencies)", "Health and Safety Executive", "Foreign and Commonwealth Office (excl. agencies)", "Department for International Development", "All employees"]
+                    }
+                },
+                {
+                    "name": "profession_of_post",
+                    "title": "Profession of post",
+                    "description": "Profession of post",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Commercial", "Communications", "Corporate Finance", "Counter Fraud", "Digital, Data and Technology", "Economics", "Finance", "Human Resources", "Inspector of Education and Training", "Intelligence Analysis", "Internal Audit", "International Trade", "Knowledge and Information Management", "Legal", "Medicine", "Operational Delivery", "Operational Research", "Planning", "Planning Inspectors", "Policy", "Project Delivery", "Property", "Psychology", "Science and Engineering", "Security", "Social Research", "Statistics", "Tax", "Veterinarian", "Other", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "religion_or_belief",
+                    "title": "Religion or belief",
+                    "description": "Religion or belief",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Christian", "Buddhist", "Hindu", "Jewish", "Muslim", "Sikh", "Any other religion", "No religion", "Not declared", "Not reported", "All declared", "All employees"]
+                    }
+                },
+                {
+                    "name": "responsibility_level",
+                    "title": "Responsibility level",
+                    "description": "Responsibility level, often called grade or payband",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Senior Civil Service Level", "Grades 6 and 7", "Senior and Higher Executive Officers", "Executive Officers", "Administrative Officers and Assistants", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "salary_band",
+                    "title": "Salary band",
+                    "description": "Salary in £5,000 bands, or high-earner threshold band",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Up to £20,000", "£20,001 - 25,000", "£25,001 - 30,000", "£30,001 - 35,000", "£35,001 - 40,000", "£40,001 - 45,000", "£45,001 - 50,000", "£50,001 - 55,000", "£55,001 - 60,000", "£60,001 - 65,000", "£65,001 - 70,000", "£70,001 - 75,000", "£75,001 - 100,000", "£100,001 - 125,000", "£125,001 - 150,000", "£150,001+", "Not reported", "Greater than £100,000", "Greater than £150,000", "Greater than £200,000", "All employees"]
+                    }
+                },
+                {
+                    "name": "sex",
+                    "title": "Sex",
+                    "description": "Sex",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Male", "Female", "All employees"]
+                    }
+                },
+                {
+                    "name": "sexual_orientation",
+                    "title": "Sexual orientation",
+                    "description": "Sex orientation",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Bisexual", "Gay/Lesbian", "Heterosexual/Straight", "Other", "Not declared", "Not reported", "All declared", "All employees"]
+                    }
+                },
+                {
+                    "name": "transfer_type",
+                    "title": "Transfer type",
+                    "description": "Type of internal transfer",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Transfer of Function Within Civil Service", "Transfer To Another Department", "Loan To Another Department", "End Of Loan", "All employees"]
+                    }
+                },
+                {
+                    "name": "uk_region",
+                    "title": "UK region",
+                    "description": "Region of England or country",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["North East", "North West", "Yorkshire and The Humber", "East Midlands", "West Midlands", "East of England", "London", "South East", "South West", "Wales", "Scotland", "Northern Ireland", "Overseas", "Not reported", "All employees"]
+                    }
+                },
+                {
+                    "name": "working_pattern",
+                    "title": "Working pattern",
+                    "description": "Whether a full-time or part-time worker",
+                    "datatype": {
+                        "base": "string",
+                        "values": ["Full-time", "Part-time", "All employees", "All Employees"]
+                    }
+                },
+                {
+                    "name": "note",
+                    "title": "Note",
+                    "description": "Technical or statistical quality notes about the cell value",
+                    "datatype": "string"
+                },
+                {
+                    "name": "value_class",
+                    "title": "Value class",
+                    "description": "The general class of the value",
+                    "datatype": {
+                        "base": "string",
+                        "values": [
+                            {
+                                "name": "age",
+                                "description": "The value is an age statistic, e.g. 47 years"
+                            },
+                            {
+                                "name": "employment",
+                                "description": "The value is a count of staff in post employees"
+                            },
+                            {
+                                "name": "flow",
+                                "description": "The value is a count of employees, but specifically of entrants, leavers or transfers"
+                            },
+                            {
+                                "name": "salary",
+                                "description": "The value is a salary statistic (e.g. £25,000 pounds) or a count of employees by salary band"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "value_class",
+                    "title": "Value class",
+                    "description": "The general class of the value",
+                    "datatype": {
+                        "base": "string",
+                        "values": [
+                            {
+                                "name": "fte",
+                                "description": "Counts of employees on a full-time equivalent basis"
+                            },
+                            {
+                                "name": "headcount",
+                                "description": "Counts of employees on a headcount basis"
+                            },
+                            {
+                                "name": "highest_5k_pay_band",
+                                "description": "Counts of employees (on a headcount basis) over a specific threshold salary"
+                            },
+                            {
+                                "name": "lower_quartile",
+                                "description": "The lower quartile salary of this group of employees "
+                            },
+                            {
+                                "name": "mean",
+                                "description": "The mean salary of this group of employees "
+                            },
+                            {
+                                "name": "median",
+                                "description": "The median age or median salary of this group of employees (refer to `value_class`)"
+                            },
+                            {
+                                "name": "pay_ratio",
+                                "description": "The ratio of the highest earner to median salary "
+                            },
+                            {
+                                "name": "upper_quartile",
+                                "description": "The upper quartile salary of this group of employees" 
+                             }
+                        ]
+                    }
+                },
+                {
+                    "name": "value",
+                    "datatype": "integer",
+                    "title": "Value",
+                    "description": "The cell value"
+                }
+            ]
+        }
+    }]
+}

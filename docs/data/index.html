@@ -580,11 +580,241 @@
     <h1 class="govuk-heading-xl">Download Civil Service Statistics dataset</h1>
     
 
-    <p>The full statistical tables are <a href="https://www.gov.uk/government/statistics/civil-service-statistics-2021" class="govuk-link"  target="_blank" rel="noreferrer noopener">published on GOV.UK</a>. A machine readable format has also been created that makes it easier to work with the data programmatically.</p>
+    <p>The full statistical tables are <a href="https://www.gov.uk/government/statistics/civil-service-statistics-2021" class="govuk-link"  target="_blank" rel="noreferrer noopener">published on GOV.UK</a>. A machine readable format has also been created that makes it easier to work with the data programmatically. You can also use our table generator tool to filter the machine readable file for the selections you are most interested in.</p>
 <div class="govuk-body file-download">
   <a href="../files/acses2021_processed.csv" class="govuk-link download-link" download>Download the machine readable format (CSV, 11.9MB)</a>
 </div>
-<p>You can also use our <a href="table_generator/" class="govuk-link" >table generator</a> tool to filter the machine readable file for the selections you are most interested in.</p>
+<a href="table_generator/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+  Generate your own tables
+  <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" /></svg>
+</a>
+<div class="govuk-body">
+
+  <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+</div>
+
+<h2 id="about-the-machine-readable-dataset" class="govuk-heading-l">About the machine readable dataset</h2>
+<p>The machine readable dataset is a comma separated values (CSV) format file. It includes all values published in the traditional statistical tables spreadsheet, but in a format that can be interacted with programmatically.  The CSV file is comprised of 36,598 rows and 26 columns, where each row relates to a single value from the traditional tables.</p>
+<p>The tables below provide general information about each of the columns, this is also available programmatically as a <a href="../files/acses2021_processed.json" class="govuk-link" >JSON file</a>.</p>
+
+<h3 id="column-specification" class="govuk-heading-m">Column specification</h3>
+<p>There are 26 columns in the file, a table column identifying the corresponding table in the traditional statistical tables, 21 variable columns that relate to characteristics of civil servants, 3 metadata variables providing information about the nature of the value, and 1 a single value column. The only column with blank cells is the <code>notes</code> column which only contains a value where there is a technical note relating to the data quality of the value in the <code>value</code> column of that row.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_table</code></td>
+<td>Table</td>
+<td>The statistical table</td>
+</tr>
+<tr>
+<td><code>age_band</code></td>
+<td>Variable</td>
+<td>Age in 5 year bands</td>
+</tr>
+<tr>
+<td><code>appointment_status</code></td>
+<td>Variable</td>
+<td>Permanent or temporary appointment</td>
+</tr>
+<tr>
+<td><code>country</code></td>
+<td>Variable</td>
+<td>UK country of workplace, including a marker for overseas</td>
+</tr>
+<tr>
+<td><code>disability</code></td>
+<td>Variable</td>
+<td>Disability status</td>
+</tr>
+<tr>
+<td><code>ethnicity</code></td>
+<td>Variable</td>
+<td>Ethnic background</td>
+</tr>
+<tr>
+<td><code>flow</code></td>
+<td>Variable</td>
+<td>Whether an entrant or leaver</td>
+</tr>
+<tr>
+<td><code>function_of_post</code></td>
+<td>Variable</td>
+<td>Function of post</td>
+</tr>
+<tr>
+<td><code>leaver_cause</code></td>
+<td>Variable</td>
+<td>The reason for leaving the Civil Service</td>
+</tr>
+<tr>
+<td><code>national_identity</code></td>
+<td>Variable</td>
+<td>National identity</td>
+</tr>
+<tr>
+<td><code>nuts2</code></td>
+<td>Variable</td>
+<td>NUTS2 area grouping</td>
+</tr>
+<tr>
+<td><code>nuts3</code></td>
+<td>Variable</td>
+<td>NUTS3 area grouping</td>
+</tr>
+<tr>
+<td><code>organisation</code></td>
+<td>Variable</td>
+<td>Organisation (department/agency)</td>
+</tr>
+<tr>
+<td><code>profession_of_post</code></td>
+<td>Variable</td>
+<td>Profession of post</td>
+</tr>
+<tr>
+<td><code>religion_or_belief</code></td>
+<td>Variable</td>
+<td>Religion or belief</td>
+</tr>
+<tr>
+<td><code>responsibility_level</code></td>
+<td>Variable</td>
+<td>Responsbility level</td>
+</tr>
+<tr>
+<td><code>salary_band</code></td>
+<td>Variable</td>
+<td>Salary in £5,000 bands, or high-earner threshold band</td>
+</tr>
+<tr>
+<td><code>sex</code></td>
+<td>Variable</td>
+<td>Sex</td>
+</tr>
+<tr>
+<td><code>sexual_orientation</code></td>
+<td>Variable</td>
+<td>Sexual orientation</td>
+</tr>
+<tr>
+<td><code>transfer_type</code></td>
+<td>Variable</td>
+<td>Type of internal transfer</td>
+</tr>
+<tr>
+<td><code>uk_region</code></td>
+<td>Variable</td>
+<td>Region of England, country if UK-based but not in England, and a marker for overseas</td>
+</tr>
+<tr>
+<td><code>working_pattern</code></td>
+<td>Variable</td>
+<td>Whether full-time or part-time</td>
+</tr>
+<tr>
+<td><code>note</code></td>
+<td>Metadata</td>
+<td>Technical or statistical quality notes about the cell value</td>
+</tr>
+<tr>
+<td><code>value_class</code></td>
+<td>Metadata</td>
+<td>The general class of value type</td>
+</tr>
+<tr>
+<td><code>value_type</code></td>
+<td>Metadata</td>
+<td>The specific type of value</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>Value</td>
+<td>The value</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="value-class-specification" class="govuk-heading-s">Value class specification</h4>
+<p>The <code>value_class</code> column defines the general class of the table, it is principally used to distinguish between counts of employees (the vast majority of values) and other types of value.</p>
+<table>
+<thead>
+<tr>
+<th>Value class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>age</code></td>
+<td>The value is an age statistic, e.g. 47 years</td>
+</tr>
+<tr>
+<td><code>employment</code></td>
+<td>The value is a count of staff in post employees</td>
+</tr>
+<tr>
+<td><code>flow</code></td>
+<td>The value is a count of employees, but specifically of entrants, leavers or transfers</td>
+</tr>
+<tr>
+<td><code>salary</code></td>
+<td>The value is a salary statistic (e.g. £25,000 pounds) or a count of employees by salary band</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="value-type-specification" class="govuk-heading-s">Value type specification</h4>
+<p>The <code>value_type</code> column defines the specific type of the value.</p>
+<table>
+<thead>
+<tr>
+<th>Value type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fte</code></td>
+<td>Counts of employees on a full-time equivalent basis</td>
+</tr>
+<tr>
+<td><code>headcount</code></td>
+<td>Counts of employees on a headcount basis</td>
+</tr>
+<tr>
+<td><code>highest_5k_pay_band</code></td>
+<td>Counts of employees (on a headcount basis) over a specific threshold salary</td>
+</tr>
+<tr>
+<td><code>lower_quartile</code></td>
+<td>The lower quartile salary of this group of employees</td>
+</tr>
+<tr>
+<td><code>mean</code></td>
+<td>The mean salary of this group of employees</td>
+</tr>
+<tr>
+<td><code>median</code></td>
+<td>The median age or median salary of this group of employees (refer to <code>value_class</code>)</td>
+</tr>
+<tr>
+<td><code>pay_ratio</code></td>
+<td>The ratio of the highest earner to median salary</td>
+</tr>
+<tr>
+<td><code>upper_quartile</code></td>
+<td>The upper quartile salary of this group of employees</td>
+</tr>
+</tbody>
+</table>
 
 
 
