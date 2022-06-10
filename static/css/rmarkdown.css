@@ -159,6 +159,14 @@
   padding: 15px !important;
 }
 
+.govuk_dt_numeric_cell, .dt-right {
+  text-align: right;
+}
+
+th.govuk_dt_numeric_cell {
+  font-weight: 700;
+}
+
 /*  ===========================
     crosstalk selectize filters
     =========================== */
