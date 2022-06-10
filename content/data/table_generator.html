@@ -661,22 +661,34 @@ rmarkdown: true
 
         table_html += "</table>";
 
+        var dt_dom = "";
+        if (filter_res.length < 11){
+            dt_dom = "<'govuk_dt_table't><'govuk_dt_nav'iB>";
+        } else {
+            dt_dom = "<'govuk_dt_table't><'govuk_dt_nav'piB>";
+        }
+
         $("#results_meta_table").html(table_meta_html);
         $("#results_meta_categories").html(categories_meta_html);
         $("#results_container").html(table_html);
         $("#filter_results").show();
         $("#results_table").dataTable({
-            dom: "<'govuk_dt_table't><'govuk_dt_nav'piB>",
+            dom: dt_dom,
             buttons: [{
-                    extend: "csv",
-                    title: "Civil Service Statistics 2021"
+                    extend: "copy",
+                    title: function(){
+                        var txt = "Civil Service Statistics 2021\r\n" + $("#filter_source_table option:selected").text();
+                        if (number_of_selections > 0) {
+                            txt += "\r\n" + categories_meta_html.substring(67, categories_meta_html.length - 1);
+                        }
+                        return (txt)
+                    }
                 },
                 {
                     extend: "csv",
                     text: "Download",
-                    csv_spec: {
-                        filename: "civilservicestatistics2021_filtered_data.csv"
-                    }
+                    filename: "civilservicestatistics2021_"+ $("#filter_source_table option:selected").val() +
+                        "_filtered" + Date.now() + ".csv"
                 }
             ],
             "columnDefs": [{
@@ -686,7 +698,8 @@ rmarkdown: true
 
             }]
         });
-
+        
+        govuk_DT_styling();
         document.getElementById("filter_results").scrollIntoView();
         $("#filter_results").focus()
 
