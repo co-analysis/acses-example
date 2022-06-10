@@ -636,7 +636,7 @@
 <div id="filter_group" class="govuk-form-group">
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h3 class="govuk-fieldset__heading govuk-!-font-size-27">
+            <h3 class="govuk-fieldset__heading">
                 Select your data filters
             </h3>
         </legend>
@@ -753,28 +753,6 @@
                 Variable
             </label>
             <select class="govuk-select" id="filter_variable" name="filter_variable">
-                <option value="null">Please select a variable</option>
-                <option value="age_band">Age Band</option>
-                <option value="appointment_status">Appointment status</option>
-                <option value="country">Country</option>
-                <option value="disability">Disability</option>
-                <option value="ethnicity">Ethnicity</option>
-                <option value="flow">Flow</option>
-                <option value="function_of_post">Function of post</option>
-                <option value="leaver_cause">Leaver cause</option>
-                <option value="national_identity">National identity</option>
-                <option value="nuts2">NUTS2 area</option>
-                <option value="nuts3">NUTS 3 area</option>
-                <option value="organisation">Organisation</option>
-                <option value="profession_of_post">Profession of post</option>
-                <option value="religion_or_belief">Religion or belief</option>
-                <option value="responsibility_level">Responsibility level</option>
-                <option value="salary_band">Salary band</option>
-                <option value="sex">Sex</option>
-                <option value="sexual_orientation">Sexual orientation</option>
-                <option value="transfer_type">Transfer type</option>
-                <option value="uk_region">UK region</option>
-                <option value="working_pattern">Working pattern</option>
             </select>
         </div>
         <div class="govuk-form-group" id="filter_categories_group" style="display:none">
@@ -820,9 +798,14 @@
 
 <div id="filter_results" style="display:none;">
     <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
-    <h3 class="govuk-heading-m">Generated table</h3>
+    <h3 class="govuk-heading-l">Generated table</h3>
     <div class="govuk-grid-row data-card">
-        <div class="govuk-grid-column-full data-display govuk-!-font-size-14" id="results_container">
+        <div class="govuk-grid-column-full data-display">
+            <div id="results_meta" class="govuk-body">
+                <p id="results_meta_table"></p>
+                <p id="results_meta_categories"></p>
+            </div>
+            <div id="results_container" class="govuk-!-font-size-14"></div>
         </div>
     </div>
 </div>
@@ -832,29 +815,30 @@
     let filter_res = [];
     let csv_columns = [];
     let var_selected = "";
-    const blank_categories = {
-        age_band: [],
-        appointment_status: [],
-        country: [],
-        disability: [],
-        ethnicity: [],
-        flow: [],
-        function_of_post: [],
-        leaver_cause: [],
-        national_identity: [],
-        nuts2: [],
-        nuts3: [],
-        organisation: [],
-        profession_of_post: [],
-        religion_or_belief: [],
-        responsibility_level: [],
-        salary_band: [],
-        sex: [],
-        sexual_orientation: [],
-        transfer_type: [],
-        uk_region: [],
-        working_pattern: []
-    }
+    let category_selections = {
+        age_band: "",
+        appointment_status: "",
+        country: "",
+        disability: "",
+        ethnicity: "",
+        flow: "",
+        function_of_post: "",
+        leaver_cause: "",
+        national_identity: "",
+        nuts2: "",
+        nuts3: "",
+        organisation: "",
+        profession_of_post: "",
+        religion_or_belief: "",
+        responsibility_level: "",
+        salary_band: "",
+        sex: "",
+        sexual_orientation: "",
+        transfer_type: "",
+        uk_region: "",
+        working_pattern: ""
+    };
+    let number_of_selections = 0;
 
     Papa.parse(
         "../../files/acses2021_processed.csv", {
@@ -866,6 +850,70 @@
             }
         }
     );
+
+    let table_variables = {
+        table_01: ["responsibility_level", "sex", "working_pattern"],
+        table_02: ["ethnicity", "responsibility_level"],
+        table_03: ["disability", "responsibility_level"],
+        table_04: ["age_band", "responsibility_level"],
+        table_04a: ["responsibility_level"],
+        table_05: ["national_identity", "responsibility_level"],
+        table_06: ["salary_band", "sex", "working_pattern"],
+        table_06a: ["sex", "working_pattern"],
+        table_07: ["responsibility_level", "sex", "working_pattern"],
+        table_08: ["organisation", "profession_of_post"],
+        table_08a: ["organisation", "profession_of_post"],
+        table_09: ["flow", "responsibility_level", "sex"],
+        table_10: ["appointment_status", "country"],
+        table_10a: ["appointment_status", "uk_region"],
+        table_12: ["organisation", "uk_region"],
+        table_13: ["appointment_status", "country", "sex", "working_pattern"],
+        table_13a: ["appointment_status", "sex", "uk_region", "working_pattern"],
+        table_14: ["appointment_status", "nuts2", "sex", "working_pattern"],
+        table_15: ["appointment_status", "nuts3", "sex", "working_pattern"],
+        table_16: ["responsibility_level", "sex", "uk_region"],
+        table_17: ["ethnicity", "responsibility_level", "uk_region"],
+        table_18: ["disability", "responsibility_level", "uk_region"],
+        table_19: ["age_band", "country"],
+        table_19a: ["age_band", "uk_region"],
+        table_20: ["organisation", "responsibility_level"],
+        table_21: ["organisation", "responsibility_level"],
+        table_22: ["organisation", "responsibility_level", "sex"],
+        table_23: ["age_band", "responsibility_level", "sex"],
+        table_24: ["responsibility_level", "sex", "working_pattern"],
+        table_25: ["organisation", "responsibility_level"],
+        table_26: ["country", "responsibility_level"],
+        table_26a: ["responsibility_level", "uk_region"],
+        table_27: ["ethnicity", "responsibility_level"],
+        table_28: ["disability", "responsibility_level"],
+        table_29: ["organisation", "sex", "working_pattern"],
+        table_29a: ["organisation", "sex", "working_pattern"],
+        table_30: ["organisation", "sex", "working_pattern"],
+        table_30a: ["organisation", "sex", "working_pattern"],
+        table_31: ["organisation", "sex", "working_pattern"],
+        table_31a: ["organisation", "sex", "working_pattern"],
+        table_32: ["organisation", "responsibility_level", "sex", "working_pattern"],
+        table_33: ["organisation", "responsibility_level", "sex", "working_pattern"],
+        table_35: ["salary_band", "working_pattern"],
+        table_37: ["ethnicity", "organisation"],
+        table_38: ["ethnicity", "organisation"],
+        table_39: ["age_band", "organisation"],
+        table_40: ["flow", "organisation", "sex"],
+        table_41: ["ethnicity", "flow", "organisation"],
+        table_42: ["leaver_cause", "organisation"],
+        table_43: ["organisation", "transfer_type"],
+        table_45: ["profession_of_post"],
+        table_47: ["profession_of_post", "uk_region"],
+        table_a1: ["organisation", "sexual_orientation"],
+        table_a2: ["responsibility_level", "sexual_orientation"],
+        table_a3: ["organisation", "religion_or_belief"],
+        table_a4: ["religion_or_belief", "responsibility_level"],
+        table_b: ["organisation"],
+        table_d1: ["function_of_post", "organisation"],
+        table_d2: ["function_of_post", "organisation"],
+        table_d3: ["function_of_post"],
+        table_d4: ["function_of_post", "uk_region"]
+    }
 
     let variable_labels = {
         age_band: "Age band",
@@ -1062,31 +1110,10 @@
         working_pattern: ["Full-time", "Part-time", "All employees", "All Employees"]
     }
 
-    let category_selections = {
-        age_band: [],
-        appointment_status: [],
-        country: [],
-        disability: [],
-        ethnicity: [],
-        flow: [],
-        function_of_post: [],
-        leaver_cause: [],
-        national_identity: [],
-        nuts2: [],
-        nuts3: [],
-        organisation: [],
-        profession_of_post: [],
-        religion_or_belief: [],
-        responsibility_level: [],
-        salary_band: [],
-        sex: [],
-        sexual_orientation: [],
-        transfer_type: [],
-        uk_region: [],
-        working_pattern: []
-    }
-
     function select_table() {
+        
+        var table_selected = $("#filter_source_table").val();
+        
         if ($("#filter_source_table option:selected").val() == "null") {
             $("#generate_table").hide();
             $("#filter_variable_group").hide();
@@ -1095,7 +1122,6 @@
             $("#reset_filters").hide();
             $("#filter_selections").hide();
         } else {
-            $("#filter_variable_group").show();
             $("#generate_table").show();
             $("#filter_categories_group").hide();
             $("#add_category").hide();
@@ -1103,6 +1129,17 @@
             $("#filter_categories").html("");
             $("#filter_selections").show();
         }
+
+        let variables_html = "<option value='null'>Please select a category</option>";
+
+        table_variables[table_selected].forEach(function(variable){
+            variables_html += "<option value='" + variable + "'>" + variable_labels[variable] + "</option>";
+        });
+
+        $("#filter_variable").html(variables_html);
+
+        $("#filter_variable_group").show();
+
     }
 
     function select_variable() {
@@ -1117,7 +1154,7 @@
 
         var_selected = $("#filter_variable").val();
 
-        let options_html = "<option value='null'>Please select a category</option>"
+        let options_html = "<option value='null'>Please select a category</option>";
 
         variable_categories[var_selected].forEach(function (category) {
             options_html += "<option value='" + category + "'>" + category + "</option>";
@@ -1136,19 +1173,15 @@
             return
         }
 
-        var number_of_selections = 0;
-
-        category_selections[var_selected].push($("#filter_categories option:selected").val());
+        category_selections[var_selected] = $("#filter_categories option:selected").val();
 
         out_html = "<h4 class='govuk-heading-s'>Categories selected</h4><p class='govuk-body'>";
         out_html += "<ul class='govuk-list'>"
 
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable].length != 0) {
-                category_selections[variable].forEach(function (category) {
-                    out_html += "<li>" + variable_labels[variable] + ": " + category + "</li>";
-                    number_of_selections += 1;
-                });
+            if (category_selections[variable] != "") {
+                out_html += "<li>" + variable_labels[variable] + ": " + category_selections[variable] + "</li>";
+                number_of_selections += 1
             }
         });
 
@@ -1164,8 +1197,16 @@
     }
 
     function reset_categories() {
-        category_selections = blank_categories;
+        number_of_selections = 0;
+        Object.keys(category_selections).forEach(function (variable) {
+            category_selections[variable] = ""
+        });
+        $("#filter_variable").val("null");
+        $("#filter_categories").val("null");
         $("#filter_selections").html("<h4 class='govuk-heading-s'>No categories selected</h4>");
+        $("#filter_categories_group").hide();
+        $("#add_category").hide();
+        $("#reset_filters").hide();
         $("#reset_filters").hide();
         $("#no_results").hide();
     }
@@ -1177,10 +1218,8 @@
         filter_res = filter_res.filter(data => data.source_table == $("#filter_source_table option:selected").val());
 
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable].length != 0) {
-                category_selections[variable].forEach(function (category) {
-                    filter_res = filter_res.filter(data => data[variable] == category);
-                });
+            if (category_selections[variable] != "") {
+                filter_res = filter_res.filter(data => data[variable] == category_selections[variable]);
             }
         });
 
@@ -1198,6 +1237,21 @@
         $("#filter_results").hide();
         $("#filter_group").removeClass("govuk-form-group--error");
         $("#no_filters_msg").hide();
+
+        let table_meta_html = "<strong class='govuk-!-font-weight-bold'>" + $("#filter_source_table option:selected").text() + "</strong>";
+        let categories_meta_html = ""
+
+        if (number_of_selections == 0) {
+            categories_meta_html = ""
+        } else {
+            categories_meta_html = "<strong class='govuk-!-font-weight-bold'>Filters applied:</strong> "
+            Object.keys(category_selections).forEach(function (variable) {
+                if (category_selections[variable] != "") {
+                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable] + "; ";
+                }
+            });
+            categories_meta_html = categories_meta_html.substring(0, categories_meta_html.length - 2) + ".";
+        }
 
         let table_html = "<table id='results_table' class='govuk-table govuk-!-font-size-14'>";
 
@@ -1226,6 +1280,8 @@
 
         table_html += "</table>";
 
+        $("#results_meta_table").html(table_meta_html);
+        $("#results_meta_categories").html(categories_meta_html);
         $("#results_container").html(table_html);
         $("#filter_results").show();
         $("#results_table").dataTable({
