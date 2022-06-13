@@ -172,17 +172,20 @@ govukhugo::render_svg(
 {{< tab title="Table" heading="hide">}}
 ```{r grade_table}
 
-acses2021_grade_pyramid %>%
+grade_table <- acses2021_grade_pyramid %>%
   select(responsibility_level, value, pc_valid) %>%
-  mutate(value = scales::comma(value),
-         pc_valid = scales::percent(janitor::round_half_up(pc_valid, 3), 0.1)) %>%
-  arrange(desc(responsibility_level)) %>%
-  knitr::kable(
-    format = "html", 
-    align = "lrr",
-    col.names = c("Grade/responsibility level", "Number", "Percent"),
-    caption = "Civil Service headcount by grade"
-  )
+  arrange(desc(responsibility_level))
+
+govukhugo::govuk_datatable(
+  grade_table,
+  title = "Civil Service headcount by grade",
+  col_names = c("Grade/responsibility level", "Headcount", "Percent"),
+  page_length = 12,
+  search = FALSE
+) %>%
+  DT::formatRound(2, 0) %>%
+  DT::formatPercentage(3, 1)
+
 ```
 {{< /tab >}}
 {{< /tabset >}}
