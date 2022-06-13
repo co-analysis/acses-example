@@ -625,10 +625,30 @@
 
     
 <p class="govuk-body">From this page you can filter the raw statistical tables that make up the Civil Service
-    Statistics.</p>
-<p class="govuk-body">Use the filters to create your own subset of the machine readable tables. Please note this may
-    results in a wide table that you will need to scroll horizontally to view in full. You can copy the table to the
+    Statistics. Use the filters to create your own subset of the machine readable tables. You can copy the table to the
     clipboard or download your selection as a CSV file.</p>
+
+<details class="govuk-details" data-module="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Instructions
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p>To use the table generator you need to first select a source table, which is a table from the published statistical tables.
+After selecting a table you will be shown a drop-down list to select a variable from that table and then you will be
+able to select a category from that variable. You can then add this category to the table filters. You are able to select
+multiple categories for each variable and multiple variables for each table.</p>
+<p>Once you have set the table and any filters you can then generate the table. You must set a source table but you do not need
+to set any categorical filters to generate a table. If your selection of filters that results in no data you will be shown
+an error message.</p>
+<p>The table is presented as a &ldquo;paged&rdquo; table, if your table has more than 10 rows you will need to use the page navigation buttons
+below the table to navigate to another page of rows, you can click on column headings to sort the rows in ascending or
+descending order.</p>
+<p>The generated table can be copied to the clipboard from the &ldquo;copy&rdquo; button or downloaded as a CSV file with the &ldquo;download&rdquo; button.</p>
+
+  </div>
+</details>
 
 <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
@@ -810,27 +830,27 @@
     let csv_columns = [];
     let var_selected = "";
     let category_selections = {
-        age_band: "",
-        appointment_status: "",
-        country: "",
-        disability: "",
-        ethnicity: "",
-        flow: "",
-        function_of_post: "",
-        leaver_cause: "",
-        national_identity: "",
-        nuts2: "",
-        nuts3: "",
-        organisation: "",
-        profession_of_post: "",
-        religion_or_belief: "",
-        responsibility_level: "",
-        salary_band: "",
-        sex: "",
-        sexual_orientation: "",
-        transfer_type: "",
-        uk_region: "",
-        working_pattern: ""
+        age_band: [],
+        appointment_status: [],
+        country: [],
+        disability: [],
+        ethnicity: [],
+        flow: [],
+        function_of_post: [],
+        leaver_cause: [],
+        national_identity: [],
+        nuts2: [],
+        nuts3: [],
+        organisation: [],
+        profession_of_post: [],
+        religion_or_belief: [],
+        responsibility_level: [],
+        salary_band: [],
+        sex: [],
+        sexual_orientation: [],
+        transfer_type: [],
+        uk_region: [],
+        working_pattern: []
     };
     let number_of_selections = 0;
 
@@ -1174,15 +1194,18 @@
             return
         }
 
-        category_selections[var_selected] = $("#filter_categories option:selected").val();
+        number_of_selections = 0;
+
+        category_selections[var_selected].push($("#filter_categories option:selected").val());
+        
 
         out_html = "<h4 class='govuk-heading-s'>Categories selected</h4><p class='govuk-body'>";
-        out_html += "<ul class='govuk-list'>"
+        out_html += "<ul class='govuk-list'>";
 
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable] != "") {
-                out_html += "<li>" + variable_labels[variable] + ": " + category_selections[variable] + "</li>";
-                number_of_selections += 1
+            if (category_selections[variable].length > 0) {
+            out_html += "<li>" + variable_labels[variable] + ": " + category_selections[variable].join(", ") + "</li>";
+            number_of_selections += category_selections[variable].length;
             }
         });
 
@@ -1200,7 +1223,7 @@
     function reset_categories() {
         number_of_selections = 0;
         Object.keys(category_selections).forEach(function (variable) {
-            category_selections[variable] = ""
+            category_selections[variable] = [];
         });
         $("#filter_variable").val("null");
         $("#filter_categories").val("null");
@@ -1218,9 +1241,17 @@
 
         filter_res = filter_res.filter(data => data.source_table == $("#filter_source_table option:selected").val());
 
+        /*
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable] != "") {
+            if (category_selections[variable].length "") {
                 filter_res = filter_res.filter(data => data[variable] == category_selections[variable]);
+            }
+        });
+        */
+
+        Object.keys(category_selections).forEach(function (variable) {
+            if (category_selections[variable].length > 0) {
+                filter_res = filter_res.filter( data => category_selections[variable].includes(data[variable]));
             }
         });
 
@@ -1262,8 +1293,8 @@
         } else {
             categories_meta_html = "<strong class='govuk-!-font-weight-bold'>Filters applied:</strong> "
             Object.keys(category_selections).forEach(function (variable) {
-                if (category_selections[variable] != "") {
-                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable] +
+                if (category_selections[variable].length > 0) {
+                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable].join(", ") +
                         "; ";
                 }
             });
