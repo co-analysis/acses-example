@@ -14,5 +14,5 @@ In this section you can explore statistics about the composition of the Civil Se
 - [ethnicity and national identity](ethnicity/)
 - [disability](disability/)
 - [sexual orientation](sexual_orientation/)
-- [religion and belief](religion/)
+- [religion and belief](religion_belief/)
 

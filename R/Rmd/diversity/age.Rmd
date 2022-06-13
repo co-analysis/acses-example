@@ -7,7 +7,300 @@ summary: "Headline statistics for civil servants by age"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
+age_totals <- acses2021 %>%
+  filter(source_table == "table_04" & 
+           responsibility_level == "All employees" &
+           age_band != "Not reported" &
+           age_band != "All employees") %>%
+  arrange(age_band)
+
+age_totals <- purrr::set_names(
+  x  = age_totals$value,
+  nm = age_totals$age_band
+)
+
+median_age_grade <- acses2021 %>%
+  filter(source_table == "table_04a") %>%
+  select(responsibility_level, value) %>%
+  mutate(
+    responsibility_level = factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants", "Not reported", 
+                 "All employees"),
+      ordered = TRUE)
+  ) %>%
+  arrange(responsibility_level)
+
+median_age_all <- median_age_grade$value[median_age_grade$responsibility_level == "All employees"]
+
 ```
 
-Holding page
+As at 31 March 2021, the median age of civil servants was `r median_age_all` years. There are `r scales::comma(sum(age_totals[1:2]))` civil servants aged under 30 (`r scales::percent(sum(age_totals[1:2])/sum(age_totals), 1)` of those whose age is known) and `r scales::comma(sum(age_totals[6:7]))` civil servants aged 60 or over (`r scales::percent(sum(age_totals[6:7])/sum(age_totals), 1)` of those whose age is known).
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="age-chart">}}
+```{r age_chart}
+age_chart_df <- acses2021 %>%
+  filter(source_table == "table_04" & 
+           responsibility_level == "All employees" &
+           age_band != "All employees") %>%
+  select(age_band, value) %>%
+  mutate(
+    age_band = fct_reorder(age_band, age_band),
+    age_band = fct_relevel(age_band, "Not reported", after = 0),
+    chart_label = if_else(
+      age_band == "Not reported", 
+      paste0(age_band, " (", scales::comma(value), ")"),
+      paste0("Aged ", age_band, " (", scales::comma(value), ")")
+    )
+  ) %>%
+  arrange(age_band) %>%
+  mutate(chart_label = as_factor(chart_label),
+         fill_group = if_else(
+           age_band == "Not reported", "Not reported", "Reported"),
+         bar_width = value/2
+  )
+
+age_plot <- ggplot(age_chart_df,
+                   aes(x = chart_label, y = bar_width)) +
+  geom_col(fill = govukhugo::govuk_colours["blue"]) +
+  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["blue"]) +
+  geom_text(aes(label = chart_label), hjust = 0, nudge_y = 5000, size = 4) +
+  scale_y_continuous(limits = c(-75000, 150000), expand = expansion()) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA)
+  )
+
+govukhugo::render_svg(
+  age_plot,
+  width = 600,
+  height = 350,
+  alt_title = "Civil Service headcount by age band",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by age band. Each bar",
+    "represents 10 year age bands (except for the youngest and oldest),",
+    "the bars are ordered with the oldest age band (65 & over) at the top and",
+    "the youngest age band (16-19) at the bottom. A bar to represent those",
+    "whose age is not reported is shown after the last age band."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab>}}
+{{< tab title="Table" heading="hide" ref="age-table">}}
+```{r age_table}
+
+age_table <- age_chart_df %>%
+  select(age_band, value) %>%
+  mutate(
+    age_band = fct_relevel(age_band, "Not reported", after = Inf),
+    valid = if_else(age_band == "Not reported", NA_real_, value),
+    pc_age = valid/sum(valid, na.rm = TRUE)
+  ) %>%
+  arrange(age_band) %>%
+  select(-valid)
+
+govukhugo::govuk_datatable(
+  age_table,
+  title = "Civil Service headcount by grade",
+  col_names = c("Age band", "Headcount", "Percent"),
+  search = FALSE
+) %>%
+  DT::formatRound(2, 0) %>%
+  DT::formatPercentage(3, 1)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+The Civil Service's most junior responsibility level has the largest proportion of staff aged under 30, and the largest proportion of staff aged 60 or over. The Senior Civil Service Level has the largest proportion of staff aged 40 and 49, and the largest proportion of staff aged between 50 and 59.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="age-grade-chart">}}
+```{r age_grade_chart}
+age_grade_plot_df <- acses2021 %>%
+  filter(source_table == "table_04" & 
+           responsibility_level != "All employees" &
+           responsibility_level != "Not reported" &
+           age_band != "All employees" & 
+           age_band != "Not reported") %>%
+  select(age_band, responsibility_level, value) %>%
+  mutate(
+    responsibility_level = fct_rev(factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants"))),
+    chart_age_band = case_when(
+      age_band == "16-19" | age_band == "20-29" ~ "16-29",
+      age_band == "60-64" | age_band == "65 & over" ~ "60 & over",
+      TRUE ~ age_band
+    )
+  ) %>%
+  group_by(responsibility_level, chart_age_band) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(pc_age = value/sum(value)) %>%
+  ungroup() %>%
+  mutate(
+    chart_label = if_else(
+      pc_age < 0.01,
+      NA_character_,
+      scales::percent(janitor::round_half_up(pc_age, 3), 1)
+    ),
+    text_group = if_else(chart_age_band == "60 & over", "black", "white")
+  )
+
+median_age_plot_df <- median_age_grade %>%
+  filter(responsibility_level != "All employees" & 
+           responsibility_level != "Not reported") %>%
+  mutate(value = paste(value, "years"))
+
+age_grade_plot <- ggplot(age_grade_plot_df,
+                       aes(x = responsibility_level, y = value, fill = chart_age_band)) +
+  geom_col(position = position_fill(reverse = TRUE)) +
+  geom_text(aes(label = chart_label, colour = chart_age_band), 
+            position = position_fill(vjust = 0.5, reverse = TRUE),
+            show.legend = FALSE) +
+  geom_text(
+    data = median_age_plot_df, 
+    aes(x = responsibility_level, y = 1.2, label = value, fill = NULL),
+    hjust = 0.5,
+    colour = govukhugo::govuk_colours["govuk-secondary-text-colour"]
+  ) +
+  annotate(
+    geom = "text",
+    x = 5.8, y = 1.2,
+    hjust = 0.5,
+    label = "Median age",
+    colour = govukhugo::govuk_colours["govuk-secondary-text-colour"]
+  ) +
+  scale_fill_discrete(
+    type = govukhugo::govuk_palette("categorical"),
+    name = "Age band"
+  ) +
+  scale_colour_manual(
+    values = c(
+      "16-29" = unname(govukhugo::govuk_colours["white"]),
+      "30-39" = unname(govukhugo::govuk_colours["white"]),
+      "40-49" = unname(govukhugo::govuk_colours["white"]),
+      "50-59" = unname(govukhugo::govuk_colours["white"]),
+      "60 & over" = unname(govukhugo::govuk_colours["govuk-text-colour"])
+    )
+  ) +
+  scale_x_discrete(expand = expansion(add = c(0,1))) +
+  scale_y_continuous(expand = expansion(add = c(0.01, 0.25))) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = c(0.26, 0.97),
+    legend.direction = "horizontal"
+  )
+
+govukhugo::render_svg(
+  age_grade_plot,
+  width = 800,
+  height = 400,
+  alt_title = "Civil Service headcount by age band and responsibility level",
+  alt_desc = paste(
+    "A stacked bar chart showing Civil Service headcount by age band and",
+    "responsibility level. Bars represent the proportion of civil servants in",
+    "each responsibility level that are in different age bands with the youngest",
+    "age band on the left and the oldest on the right. Age bands 16-19 and 20-29",
+    "have been grouped together as has age bands 60-64 and 65 & over.",
+    "Bars are sorted by responsibility level with the most senior level at the",
+    "top and administrative staff at the bottom. The chart does not include",
+    "representation of data for when either grade or age are not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab>}}
+{{< tab title="Age band table" heading="hide" ref="age-grade-table">}}
+```{r age_grade_table}
+
+age_grade_table <- acses2021 %>%
+  filter(source_table == "table_04" & 
+           responsibility_level != "All employees" &
+           age_band != "All employees") %>%
+  select(responsibility_level, age_band, value) %>%
+  arrange(age_band) %>%
+  mutate(
+    age_band = as_factor(age_band),
+    age_band = fct_relevel(age_band, "Not reported", after = Inf),
+    responsibility_level = fct_rev(factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants", "Not reported"),
+      ordered = TRUE))
+  ) %>%
+  group_by(responsibility_level) %>%
+  mutate(
+    valid = if_else(age_band == "Not reported", NA_real_, value),
+    pc_grade = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3),
+  ) %>%
+  group_by(age_band) %>%
+  mutate(
+    valid = if_else(responsibility_level == "Not reported", NA_real_, value),
+    pc_age = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  arrange(desc(responsibility_level), age_band) %>%
+  select(responsibility_level, age_band, value, pc_grade, pc_age)
+
+govukhugo::govuk_datatable(
+  age_grade_table,
+  title = "Civil Service headcount by age band and responsibility level",
+  col_names = c("Responsibility level", "Age", "Headcount", "Percent of grade",
+                "Percent of age band"),
+  page_length = 8,
+  search =  FALSE
+) %>%
+  DT::formatRound(3, digits = 0) %>%
+  DT::formatPercentage(4:5, digits = 1)
+
+```
+{{< /tab >}}
+{{< tab title="Median age table" heading="hide" ref="median-age-table">}}
+```{r median_age_table}
+
+govukhugo::govuk_datatable(
+  median_age_grade,
+  title = "Median age by responsibility level",
+  col_names = c("Responsibility level", "Median age"),
+  page_length = 8,
+  search =  FALSE
+) %>%
+  DT::formatRound(2, digits = 0)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
