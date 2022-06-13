@@ -192,27 +192,27 @@ rmarkdown: true
     let csv_columns = [];
     let var_selected = "";
     let category_selections = {
-        age_band: "",
-        appointment_status: "",
-        country: "",
-        disability: "",
-        ethnicity: "",
-        flow: "",
-        function_of_post: "",
-        leaver_cause: "",
-        national_identity: "",
-        nuts2: "",
-        nuts3: "",
-        organisation: "",
-        profession_of_post: "",
-        religion_or_belief: "",
-        responsibility_level: "",
-        salary_band: "",
-        sex: "",
-        sexual_orientation: "",
-        transfer_type: "",
-        uk_region: "",
-        working_pattern: ""
+        age_band: [],
+        appointment_status: [],
+        country: [],
+        disability: [],
+        ethnicity: [],
+        flow: [],
+        function_of_post: [],
+        leaver_cause: [],
+        national_identity: [],
+        nuts2: [],
+        nuts3: [],
+        organisation: [],
+        profession_of_post: [],
+        religion_or_belief: [],
+        responsibility_level: [],
+        salary_band: [],
+        sex: [],
+        sexual_orientation: [],
+        transfer_type: [],
+        uk_region: [],
+        working_pattern: []
     };
     let number_of_selections = 0;
 
@@ -556,15 +556,18 @@ rmarkdown: true
             return
         }
 
-        category_selections[var_selected] = $("#filter_categories option:selected").val();
+        number_of_selections = 0;
+
+        category_selections[var_selected].push($("#filter_categories option:selected").val());
+        
 
         out_html = "<h4 class='govuk-heading-s'>Categories selected</h4><p class='govuk-body'>";
-        out_html += "<ul class='govuk-list'>"
+        out_html += "<ul class='govuk-list'>";
 
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable] != "") {
-                out_html += "<li>" + variable_labels[variable] + ": " + category_selections[variable] + "</li>";
-                number_of_selections += 1
+            if (category_selections[variable].length > 0) {
+            out_html += "<li>" + variable_labels[variable] + ": " + category_selections[variable].join(", ") + "</li>";
+            number_of_selections += category_selections[variable].length;
             }
         });
 
@@ -582,7 +585,7 @@ rmarkdown: true
     function reset_categories() {
         number_of_selections = 0;
         Object.keys(category_selections).forEach(function (variable) {
-            category_selections[variable] = ""
+            category_selections[variable] = [];
         });
         $("#filter_variable").val("null");
         $("#filter_categories").val("null");
@@ -600,9 +603,17 @@ rmarkdown: true
 
         filter_res = filter_res.filter(data => data.source_table == $("#filter_source_table option:selected").val());
 
+        /*
         Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable] != "") {
+            if (category_selections[variable].length "") {
                 filter_res = filter_res.filter(data => data[variable] == category_selections[variable]);
+            }
+        });
+        */
+
+        Object.keys(category_selections).forEach(function (variable) {
+            if (category_selections[variable].length > 0) {
+                filter_res = filter_res.filter( data => category_selections[variable].includes(data[variable]));
             }
         });
 
@@ -644,8 +655,8 @@ rmarkdown: true
         } else {
             categories_meta_html = "<strong class='govuk-!-font-weight-bold'>Filters applied:</strong> "
             Object.keys(category_selections).forEach(function (variable) {
-                if (category_selections[variable] != "") {
-                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable] +
+                if (category_selections[variable].length > 0) {
+                    categories_meta_html += variable_labels[variable] + ": " + category_selections[variable].join(", ") +
                         "; ";
                 }
             });
