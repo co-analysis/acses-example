@@ -1,5 +1,6 @@
 ---
 title: "Civil Servants by NUTS3"
+knit: govukhugo::govukhugo_knit
 date: 2021-01-01
 section: location
 weight: 100
