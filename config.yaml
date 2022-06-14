@@ -48,4 +48,3 @@ menu:
     - identifier: govukpub
       name: GOV.UK publication
       url: https://www.gov.uk/government/statistics/civil-service-statistics-2021
-      weight: 300
