@@ -114,7 +114,7 @@ grade_org_out <- acses2021_grade_org %>%
 
 ```
 
-As at 31 March 2021 three in ten civil servants (`r acses2021_grade_pc_valid["Administrative Officers and Assistants"]`) were in an administrative grade[^1], compared to almost half of civil servants (47.1%) in 2011 being at an administrative grade. There are now `r acses2021_grade_numbers["Senior Civil Service Level"]` civil servants are at Senior Civil Service Level[^2], this equates to `r acses2021_grade_pc_valid["Senior Civil Service Level"]` of the Civil Service.
+As at 31 March 2021 three in ten civil servants (`r acses2021_grade_pc_valid["Administrative Officers and Assistants"]`) were in an administrative grade[^1], compared to almost half of civil servants (47.1%) in 2011 being at an administrative grade.
 
 ::::{.govuk-grid-row .data-card}
 :::{.govuk-grid-column-full-width .data-display}

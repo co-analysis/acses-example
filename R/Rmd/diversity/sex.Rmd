@@ -307,7 +307,7 @@ top3_dept_male <- sex_dept %>%
 
 ```
 
-The three departmental groups with the largest proportion of female staff are: `r glue::glue_collapse(top3_dept_female$out_text, sep = ", ", last = " and ")`. The three departmental groups with the largest proportion of male staff are: `r glue::glue_collapse(top3_dept_male$out_text, sep = ", ", last = " and ")`.
+The three departmental groups with the largest proportion of female staff are `r glue::glue_collapse(top3_dept_female$out_text, sep = ", ", last = " and ")`. The three departmental groups with the largest proportion of male staff are `r glue::glue_collapse(top3_dept_male$out_text, sep = ", ", last = " and ")`.
 
 ::::{.govuk-grid-row .data-card}
 :::{.govuk-grid-column-full-width .data-display}

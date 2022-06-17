@@ -6,7 +6,7 @@ listpages: false
 ---
 
 {{< lead >}}
-The Civil Service headcount is 484,880, up from 456,410 16% in 2020. On a full-time equivalent basis (FTE), 14% employment is 452,830, up from 423,770 in 2020.
+The Civil Service headcount is 484,880, up from 456,410 16% in 2020. On a full-time equivalent basis (FTE), 14% employment is 452,830, up from 423,770 in 2020. This is 95,000 above the lowest figure since WWII which was recorded in June 2016.
 {{< /lead >}}
 
 {{< summarycards >}}

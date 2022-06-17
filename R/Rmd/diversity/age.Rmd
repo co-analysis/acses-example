@@ -305,3 +305,169 @@ govukhugo::govuk_datatable(
 {{< /tabset >}}
 :::
 ::::
+
+
+```{r age_dept_setup, include=FALSE}
+
+age_org <- acses2021 %>%
+  filter(source_table == "table_39" &
+           age_band != "All employees" &
+           organisation != "All employees") %>%
+  select(age_band, organisation, value) %>%
+  mutate(
+    chart_age_band = case_when(
+      age_band == "16-19" | age_band == "20-29" ~ "16-29",
+      age_band == "60-64" | age_band == "65 & over" ~ "60 & over",
+      TRUE ~ age_band
+    )
+  )
+
+age_dept <- age_org %>%
+  left_join(group_lookup, by = "organisation") %>%
+  group_by(dept_group, age_band) %>%
+  summarise(value = sum(value), .groups = "drop") %>%
+  add_count(dept_group, wt = value, name = "group_hc")
+
+age_dept_chartbands <- age_org %>%
+  left_join(group_lookup, by = "organisation") %>%
+  group_by(dept_group, chart_age_band) %>%
+  summarise(value = sum(value), .groups = "drop") %>%
+  add_count(dept_group, wt = value, name = "group_hc") %>%
+  mutate(
+    valid = if_else(chart_age_band == "Not reported", NA_real_, value),
+    pc_age = valid/group_hc
+  )
+
+u30s <- age_dept_chartbands %>%
+  filter(group_hc >= 1500 & chart_age_band == "16-29")
+
+top3_dept_u30 <- u30s %>%
+  slice_max(pc_age, n = 3) %>%
+  mutate(
+    dept_group = if_else(grepl("Standards in Education", dept_group), 
+                              "Ofsted", dept_group),
+    out_text = paste0(dept_group, " (", scales::percent(janitor::round_half_up(pc_age, 3), 0.1), ")"))
+
+n_depts_u30_20 <- u30s %>%
+  filter(pc_age >= 0.2) %>%
+  nrow()
+
+plus50 <- age_dept_chartbands %>%
+  mutate(chart_age_band = if_else(
+    chart_age_band == "50-59" | chart_age_band == "60 & over", 
+    "50plus",
+    chart_age_band)) %>%
+  group_by(dept_group, chart_age_band) %>%
+  summarise(value = sum(value), group_hc = max(group_hc), .groups = "drop") %>%
+  filter(group_hc >= 1500 & chart_age_band == "50plus") %>%
+  mutate(
+    valid = if_else(chart_age_band == "Not reported", NA_real_, value),
+    pc_age = valid/group_hc,
+  )
+
+top3_dept_50plus <- plus50 %>%
+  slice_max(pc_age, n = 3) %>%
+  mutate(
+    dept_group = if_else(grepl("Standards in Education", dept_group), 
+                              "Ofsted", dept_group),
+    out_text = paste0(dept_group, " (", scales::percent(janitor::round_half_up(pc_age, 3), 0.1), ")"))
+
+n_depts_50p_30 <- plus50 %>%
+  filter(pc_age >= 0.3) %>%
+  nrow()
+
+```
+
+The three departmental groups with the largest proportion of staff under 30 are `r glue::glue_collapse(top3_dept_u30$out_text, sep = "; ", last = " and, ")`. There are a further `r n_depts_u30_20 - 3` departmental groups at least 20% of staff are aged under 30. The three departmental groups with the largest proportion of staff aged 50 or over are `r glue::glue_collapse(top3_dept_50plus$out_text, sep = "; ", last = " and, ")`. There are a further `r n_depts_50p_30` departmental groups where at least 30% of staff are aged 50 or over.
+
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="age-dept-chart">}}
+```{r age_dept_chart}
+
+age_dept_plot_df <- age_dept_chartbands %>%
+  filter(chart_age_band != "Not reported") %>%
+  select(dept_group, chart_age_band, value, group_hc) %>%
+  mutate(
+    chart_group = case_when(
+      group_hc < 1500 ~ "Other departments and agencies",
+      grepl("Standards in Education", dept_group) ~ "Ofsted",
+      TRUE ~ dept_group),
+    chart_group = fct_reorder(chart_group, group_hc, .fun = max)
+  ) %>%
+  group_by(chart_group, chart_age_band) %>% 
+  summarise(
+    value = sum(value),
+    .groups = "drop") %>%
+  group_by(chart_group) %>%
+  mutate(
+    pc_age = value / sum(value)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    chart_label = if_else(
+      pc_age < 0.1,
+      NA_character_,
+      scales::percent(janitor::round_half_up(pc_age, 2), 1)
+    ) 
+  )
+
+
+age_dept_plot <- ggplot(age_dept_plot_df,
+                       aes(x = chart_group, y = value, fill = chart_age_band)) +
+  geom_col(position = position_fill(reverse = TRUE)) +
+  geom_text(aes(label = chart_label, colour = chart_age_band), 
+            position = position_fill(vjust = 0.5, reverse = TRUE),
+            show.legend = FALSE) +
+  scale_fill_discrete(
+    type = govukhugo::govuk_palette("categorical"),
+    name = "Age band"
+  ) +
+  scale_colour_manual(
+    values = c(
+      "16-29" = unname(govukhugo::govuk_colours["white"]),
+      "30-39" = unname(govukhugo::govuk_colours["white"]),
+      "40-49" = unname(govukhugo::govuk_colours["white"]),
+      "50-59" = unname(govukhugo::govuk_colours["white"]),
+      "60 & over" = unname(govukhugo::govuk_colours["govuk-text-colour"])
+    )
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top"
+  )
+
+govukhugo::render_svg(
+  age_dept_plot,
+  width = 800,
+  height = 600,
+  alt_title = "Civil Service headcount by age band and departmental group",
+  alt_desc = paste(
+    "A stacked bar chart showing Civil Service headcount by sex and",
+    "departmental group. Bars represent the proportion of civil servants in",
+    "each departmental group by age band (the youngest band, 16-29, is on the",
+    "and the oldest, 60 and over, is on the right). The departmental groups are",
+    "arranged by overall headcount, with the largest departmental group",
+    "(Work and Pensions) at the top and the smallest departmental group",
+    "(Digital, Culture, Media and Sport) at the bottom. Departmental groups",
+    "with a headcount of less than 1,500 have been grouped together, the bars",
+    "for this group are shown after those for the smallest group."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Departmental groups" heading="hide" ref="age-dept-table">}}
+{{< /tab >}}
+{{< tab title="Organisations" heading="hide" ref="age-org-table">}}
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
