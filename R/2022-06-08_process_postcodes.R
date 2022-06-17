@@ -1,12 +1,12 @@
 # process postcode file
 
-### REQUIRES OFF-LABEL VERSION OF readODS
+### REQUIRES FEVELOPMENT VERSION OF readODS
 ### The current CRAN version of readODS includes a bug that
 ### means the number-rows-repeated attribute is considered
 ### a marker for blank rows not a sequential set of rows with
 ### identical values
 
-# remotes::install_github("mattkerlogue/readODS@repeat-rows-bug")
+# remotes::install_github("chainsawriot/readODS/")
 
 library(tidyverse)
 
@@ -94,6 +94,9 @@ write_csv(
 # due to the size of the National Statistics Postcode Lookup (NSPL) (~1.1GB) it
 # should not be kept in the project data folder to minimise copy overheads in
 # the govukhugo process
+#
+# You need to download the data from the ONS GeoPortal
+# https://geoportal.statistics.gov.uk/datasets/national-statistics-postcode-lookup-may-2022/about
 
 
 npsl_centriods <- {
