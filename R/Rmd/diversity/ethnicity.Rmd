@@ -9,6 +9,189 @@ summary: "Headline statistics for civil servants by ethnicity and national ident
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
+# ACSES 2021 separates Chinese from Asian, this is not in line with GSS
+# harmonised standards
+ethnicity_corrected <- acses2021 %>%
+  filter(source_table == "table_02") %>%
+  select(responsibility_level, ethnicity, value) %>%
+  mutate(ethnicity = if_else(ethnicity == "Chinese", "Asian", ethnicity)) %>%
+  group_by(responsibility_level, ethnicity) %>%
+  summarise(value = sum(value), .groups = "drop")
+
+ethnicity_totals <- ethnicity_corrected %>%
+  filter(
+      responsibility_level == "All employees" &
+      ethnicity %in% c("White", "Asian", "Black", "Mixed", "Other")) %>%
+  group_by(white = ethnicity == "White") %>%
+  summarise(value = sum(value), .groups = "drop") %>%
+  mutate(
+    pc_eth = value/sum(value),
+    out_num = scales::comma(value),
+    out_pc = scales::percent(janitor::round_half_up(pc_eth, 3), 0.1)
+  )
+
 ```
 
-Holding page
+As at 31 March 2021 there were `r ethnicity_totals$out_num[ethnicity_totals$white == TRUE]` civil servants that reported have a white ethnicity (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == TRUE]` of those with a known ethnicity) and there were `r ethnicity_totals$out_num[ethnicity_totals$white == FALSE]` civil servants that reported the were from an ethnic minority background (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == FALSE]` of those with a known ethnicity).
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="ethnicity-chart">}}
+```{r ethnicity_chart}
+ethnicity_plot_df <-  ethnicity_corrected %>%
+  filter(
+      responsibility_level == "All employees" &
+      ethnicity != "All employees" &
+      ethnicity != "All declared"
+  ) %>%
+  mutate(
+    ethnicity = fct_relevel(ethnicity, "White", "Mixed", "Asian", "Black",
+                            "Other", "Not declared", "Not reported"),
+    fill_group = if_else(
+      ethnicity == "Not declared" | ethnicity == "Not reported",
+      "Not provided",
+      "Provided"
+    ),
+    chart_label = paste0(ethnicity, " (", scales::comma(value), ")"),
+    chart_label = fct_rev(fct_reorder(chart_label, as.numeric(ethnicity)))
+  ) %>%
+  arrange(chart_label)
+
+ethnicity_plot <- ggplot(ethnicity_plot_df, aes(x = chart_label, y = value, 
+                                                fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Provided" = unname(govukhugo::govuk_colours["red"]),
+      "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
+    )) +
+  theme_void() +
+  coord_flip() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  ethnicity_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by ethnicity",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by ethnicity.",
+    "The bars are ordered in accordance with the Government Statistical",
+    "Service's Harmonised Standard for ethnicity information, the first",
+    "category is for those with a White ethnicity followed by Mixed, Asian,",
+    "Black and finally Other ethnicities. After the bars for ethnicity there",
+    "is one bar to show those whose have chosen not to declare their ethnicity",
+    "and one bar to show those whose ethnicity is not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="ethnicity-table">}}
+```{r ethnicity_table}
+ethnicity_table <- ethnicity_plot_df %>%
+  select(ethnicity, value) %>%
+  mutate(
+    valid = if_else(
+      ethnicity %in% c("White", "Mixed", "Asian", "Black", "Other"),
+      value,
+      NA_real_
+    ),
+    pc_eth = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3),
+  ) %>%
+  arrange(ethnicity) %>%
+  select(-valid)
+
+govukhugo::govuk_datatable(
+  ethnicity_table,
+  title = "Civil Service headcount by ethnicity",
+  col_names = c("Ethnicity", "Headcount", "Percent"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(2) %>%
+  DT::formatPercentage(3, digits = 1)
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="ethnicity-grade-chart">}}
+```{r ethnicity_grade_chart}
+ethnicity_grade_plot_df <- ethnicity_corrected %>%
+  filter((ethnicity %in% c("White", "Asian", "Black", "Mixed", "Other")) &
+           responsibility_level != "All employees" &
+           responsibility_level != "Not reported") %>%
+  mutate(
+    ethnicity = if_else(ethnicity == "White", "White", "Ethnic minority"),
+    responsibility_level = factor(
+      responsibility_level,
+      levels = c("Senior Civil Service Level", "Grades 6 and 7", 
+                 "Senior and Higher Executive Officers", "Executive Officers",
+                 "Administrative Officers and Assistants"))
+  ) %>%
+  group_by(responsibility_level, ethnicity) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(pc_eth = value/sum(value)) %>%
+  ungroup() %>%
+  mutate(pc_label = scales::percent(janitor::round_half_up(pc_eth, 2), 1))
+
+ethnicity_grade_plot <- ggplot(ethnicity_grade_plot_df,
+                               aes(x = responsibility_level, y = value,
+                                   fill = ethnicity)) +
+  geom_col(position = "fill") +
+  geom_text(aes(label = pc_label), position = position_fill(vjust = 0.5)) +
+  scale_fill_manual(
+    values = c(
+      "White" = unname(govukhugo::govuk_colours["red"]),
+      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("red"))(c(0.5))
+    ),
+    name = "Ethnicity"
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top",
+    legend.direction = "horizontal"
+  )
+
+govukhugo::render_svg(
+  ethnicity_grade_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by ethnicity",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by ethnicity."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
