@@ -79,8 +79,8 @@ age_chart_df <- acses2021 %>%
 
 age_plot <- ggplot(age_chart_df,
                    aes(x = chart_label, y = bar_width)) +
-  geom_col(fill = govukhugo::govuk_colours["blue"]) +
-  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["blue"]) +
+  geom_col(fill = govukhugo::govuk_colours["dark-blue"]) +
+  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["dark-blue"]) +
   geom_text(aes(label = chart_label), hjust = 0, nudge_y = 5000, size = 4) +
   scale_y_continuous(limits = c(-75000, 150000), expand = expansion()) +
   coord_flip() +
@@ -184,6 +184,7 @@ age_grade_plot <- ggplot(age_grade_plot_df,
   geom_col(position = position_fill(reverse = TRUE)) +
   geom_text(aes(label = chart_label, colour = chart_age_band), 
             position = position_fill(vjust = 0.5, reverse = TRUE),
+            colour = govukhugo::govuk_colours["white"],
             show.legend = FALSE) +
   geom_text(
     data = median_age_plot_df, 
@@ -199,17 +200,8 @@ age_grade_plot <- ggplot(age_grade_plot_df,
     colour = govukhugo::govuk_colours["govuk-secondary-text-colour"]
   ) +
   scale_fill_discrete(
-    type = govukhugo::govuk_palette("categorical"),
+    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(scales::rescale(1:5))),
     name = "Age band"
-  ) +
-  scale_colour_manual(
-    values = c(
-      "16-29" = unname(govukhugo::govuk_colours["white"]),
-      "30-39" = unname(govukhugo::govuk_colours["white"]),
-      "40-49" = unname(govukhugo::govuk_colours["white"]),
-      "50-59" = unname(govukhugo::govuk_colours["white"]),
-      "60 & over" = unname(govukhugo::govuk_colours["govuk-text-colour"])
-    )
   ) +
   scale_x_discrete(expand = expansion(add = c(0,1))) +
   scale_y_continuous(expand = expansion(add = c(0.01, 0.25))) +
@@ -420,19 +412,11 @@ age_dept_plot <- ggplot(age_dept_plot_df,
   geom_col(position = position_fill(reverse = TRUE)) +
   geom_text(aes(label = chart_label, colour = chart_age_band), 
             position = position_fill(vjust = 0.5, reverse = TRUE),
-            show.legend = FALSE) +
+            show.legend = FALSE,
+            colour = "white") +
   scale_fill_discrete(
-    type = govukhugo::govuk_palette("categorical"),
+    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(scales::rescale(1:5))),
     name = "Age band"
-  ) +
-  scale_colour_manual(
-    values = c(
-      "16-29" = unname(govukhugo::govuk_colours["white"]),
-      "30-39" = unname(govukhugo::govuk_colours["white"]),
-      "40-49" = unname(govukhugo::govuk_colours["white"]),
-      "50-59" = unname(govukhugo::govuk_colours["white"]),
-      "60 & over" = unname(govukhugo::govuk_colours["govuk-text-colour"])
-    )
   ) +
   coord_flip() +
   theme_void() +
