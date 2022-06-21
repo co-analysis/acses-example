@@ -305,7 +305,7 @@ age_org <- acses2021 %>%
   filter(source_table == "table_39" &
            age_band != "All employees" &
            organisation != "All employees") %>%
-  select(age_band, organisation, value) %>%
+  select(organisation, age_band, value) %>%
   mutate(
     chart_age_band = case_when(
       age_band == "16-19" | age_band == "20-29" ~ "16-29",
@@ -449,8 +449,60 @@ govukhugo::render_svg(
 ```
 {{< /tab >}}
 {{< tab title="Departmental groups" heading="hide" ref="age-dept-table">}}
+```{r age_dept_table}
+age_dept_table <- age_dept %>%
+  mutate(
+    age_band = factor(age_band, 
+                      levels = c("16-19", "20-29", "30-39", "40-49",
+                                 "50-59", "60-64", "65 & over", 
+                                 "Not reported")),
+    valid = if_else(age_band == "Not reported", NA_real_, value),
+  ) %>%
+  group_by(dept_group) %>%
+  mutate(pc_dept = valid/sum(valid, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(dept_group, age_band, value, pc_dept) %>%
+  arrange(dept_group, age_band)
+
+govukhugo::govuk_datatable(
+  age_dept_table,
+  title = "Civil Service headcount by departmental group and sex",
+  col_names = c("Departmental group", "Age band", "Headcount", "Percentage of group"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+```
 {{< /tab >}}
 {{< tab title="Organisations" heading="hide" ref="age-org-table">}}
+```{r age_org_table}
+age_org_table <- age_org %>%
+  left_join(group_lookup, by = "organisation") %>%
+  mutate(
+    age_band = factor(age_band, 
+                      levels = c("16-19", "20-29", "30-39", "40-49",
+                                 "50-59", "60-64", "65 & over", 
+                                 "Not reported")),
+    valid = if_else(age_band == "Not reported", NA_real_, value),
+  ) %>%
+  group_by(organisation) %>%
+  mutate(pc_org = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)) %>%
+  ungroup() %>%
+  select(dept_group, organisation, age_band, value, pc_org) %>%
+  arrange(dept_group, organisation, age_band)
+
+govukhugo::govuk_datatable(
+  age_org_table,
+  title = "Civil Service headcount by organisation and sex",
+  col_names = c("Departmental group", "Organisation", "Age band", "Headcount",
+                "Percentage of organisation"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatRound(columns = 4, digits = 0) %>%
+  DT::formatPercentage(columns = 5, digits = 1)
+```
 {{< /tab >}}
 {{< /tabset >}}
 :::

@@ -393,7 +393,7 @@ sex_dept_table <- sex_dept %>%
 govukhugo::govuk_datatable(
     sex_dept_table,
     title = "Civil Service headcount by departmental group and sex",
-    col_names = c("Departmental group", "Sex", "Headcount", "Percentage of sex"),
+    col_names = c("Departmental group", "Sex", "Headcount", "Percentage of group"),
     page_length = 10,
     search = FALSE
   ) %>%
@@ -407,10 +407,11 @@ govukhugo::govuk_datatable(
 
 sex_org_table <- sex_org %>%
   left_join(group_lookup, by = "organisation") %>%
+  group_by(dept_group, organisation, sex) %>%
+  summarise(value = sum(value), .groups = "drop") %>%
   group_by(organisation) %>%
   mutate(
-    org_hc = sum(value),
-    pc_sex = value/sum(value)
+    pc_sex = janitor::round_half_up(value/sum(value), 3)
   ) %>%
   ungroup() %>%
   arrange(dept_group, organisation, sex) %>%
@@ -419,7 +420,7 @@ sex_org_table <- sex_org %>%
 govukhugo::govuk_datatable(
     sex_org_table,
     title = "Civil Service headcount by organisation and sex",
-    col_names = c("Departmental group", "Organisation", "Sex", "Headcount", "Percentage of sex"),
+    col_names = c("Departmental group", "Organisation", "Sex", "Headcount", "Percentage of organisation"),
     page_length = 10,
     search = FALSE
   ) %>%
