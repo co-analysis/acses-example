@@ -8,7 +8,116 @@ summary: "Headline statistics for civil servants by disability status"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
+disability_grade <- acses2021 %>%
+  filter(source_table == "table_03" & 
+           disability != "All employees" &
+           disability != "All declared") %>%
+  mutate(
+    responsibility_level = fct_relevel(
+      responsibility_level, "Senior Civil Service Level", "Grades 6 and 7",
+      "Senior and Higher Executive Officers", "Executive Officers",
+      "Administrative Officers and Assistants", "Not reported",
+      "All employees"
+    ),
+    disability = fct_relevel(
+      disability, "Disabled", "Non-disabled", "Not declared", 
+      "Not reported"
+    ),
+    valid = if_else(
+      disability == "Not declared" | disability == "Not reported",
+      NA_real_,
+      value
+    )
+  ) %>%
+  group_by(responsibility_level) %>%
+  mutate(
+    pc_disabled = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  select(responsibility_level, disability, value, pc_disabled) %>%
+  arrange(responsibility_level, disability)
+
+disability_totals <- disability_grade %>%
+  filter(responsibility_level == "All employees") %>%
+  select(-responsibility_level)
+
 ```
 
-Holding page
+As of 31 March 2021, there were `r scales::comma(disability_totals$value[disability_totals$disability == "Disabled"], 1)` civil servants that reported they were disabled (equating to `r scales::percent(disability_totals$pc_disabled[disability_totals$disability == "Disabled"], 0.1)` of those whose disability status is known).[^1]
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="disability-chart">}}
+```{r disability_chart}
+disability_plot_df <- disability_totals %>%
+  mutate(
+    chart_label = paste0(disability, " (", scales::comma(value, 1), ")"),
+    chart_label = fct_reorder(chart_label, as.numeric(disability)),
+    fill_group = if_else(disability == "Not declared" | disability == "Not reported",
+                         "Not provided",
+                         "Provided")
+  )
+
+disability_plot <- ggplot(disability_plot_df, aes(x = fct_rev(chart_label), y = value, 
+                                                fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Provided" = unname(govukhugo::govuk_colours["green"]),
+      "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
+    )) +
+  theme_void() +
+  coord_flip() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  disability_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by disability status",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by disability status",
+    "After the bars for ethnicity there",
+    "is one bar to show those whose have chosen not to declare their ethnicity",
+    "and one bar to show those whose ethnicity is not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab>}}
+{{< tab title="Table" heading="hide" ref="disability-table">}}
+```{r disability_table}
+govukhugo::govuk_datatable(
+  disability_totals,
+  title = "Civil Service headcount by disability status",
+  col_names = c("Disability status", "Headcount", "Percent"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 2, digits = 0) %>%
+  DT::formatPercentage(columns = 3, digits = 1)
+```
+{{< /tab>}}
+{{< /tabset >}}
+:::
+::::
+
+
+[^1]: The Civil Service Statistics record two types of missing value for disability status. Where an individual has specifically chosen not to provide their disability status, for example by selecting a "Prefer not to say" value, this is recorded as "Not declared". Where an individual has not provided any data on their disability status, including not selecting a "Prefer not to say" value, this is recorded as "Not reported".

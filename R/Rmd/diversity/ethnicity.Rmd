@@ -19,6 +19,13 @@ group_lookup <- read_csv(
   file.path(data_dir, "dept_group_lookup.csv")
 )
 
+```
+
+This page provides statistics on civil servants by [ethnicity](#ethnicity) and [national identity](#national-identity)
+
+## Ethnicity
+
+```{r ethnicity_setup}
 # ACSES 2021 separates Chinese from Asian, this is not in line with GSS
 # harmonised standards
 ethnicity_corrected <- acses2021 %>%
@@ -39,10 +46,9 @@ ethnicity_totals <- ethnicity_corrected %>%
     out_num = scales::comma(value),
     out_pc = scales::percent(janitor::round_half_up(pc_eth, 3), 0.1)
   )
-
 ```
 
-As at 31 March 2021 there were `r ethnicity_totals$out_num[ethnicity_totals$white == TRUE]` civil servants that reported have a white ethnicity (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == TRUE]` of those with a known ethnicity) and there were `r ethnicity_totals$out_num[ethnicity_totals$white == FALSE]` civil servants that reported the were from an ethnic minority background (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == FALSE]` of those with a known ethnicity).
+As at 31 March 2021 there were `r ethnicity_totals$out_num[ethnicity_totals$white == TRUE]` civil servants that reported have a white ethnicity (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == TRUE]` of those with a known ethnicity) and there were `r ethnicity_totals$out_num[ethnicity_totals$white == FALSE]` civil servants that reported the were from an ethnic minority background (equating to `r ethnicity_totals$out_pc[ethnicity_totals$white == FALSE]` of those with a known ethnicity).[^1]
 
 ::::{.govuk-grid-row .data-card}
 :::{.govuk-grid-column-full-width .data-display}
@@ -73,7 +79,7 @@ ethnicity_plot <- ggplot(ethnicity_plot_df, aes(x = chart_label, y = value,
   geom_col(show.legend = FALSE) +
   scale_fill_manual(
     values = c(
-      "Provided" = unname(govukhugo::govuk_colours["red"]),
+      "Provided" = unname(govukhugo::govuk_colours["bright-purple"]),
       "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
     )) +
   theme_void() +
@@ -164,11 +170,13 @@ ethnicity_grade_plot <- ggplot(ethnicity_grade_plot_df,
                                aes(x = responsibility_level, y = value,
                                    fill = ethnicity)) +
   geom_col(position = "fill") +
-  geom_text(aes(label = pc_label), position = position_fill(vjust = 0.5)) +
+  geom_text(aes(label = pc_label), 
+            position = position_fill(vjust = 0.5),
+            colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "White" = unname(govukhugo::govuk_colours["red"]),
-      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("red"))(c(0.5))
+      "White" = unname(govukhugo::govuk_colours["bright-purple"]),
+      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("bright-purple"))(c(0.5))
     ),
     name = "Ethnicity"
   ) +
@@ -309,11 +317,11 @@ ethnicity_dept_plot <- ggplot(ethnicity_dept_plot_df,
   geom_col(position = "fill") +
   geom_text(aes(label = chart_label), 
             position = position_fill(vjust = 0.5),
-            show.legend = FALSE) +
+            colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "White" = unname(govukhugo::govuk_colours["red"]),
-      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("red"))(c(0.5))
+      "White" = unname(govukhugo::govuk_colours["bright-purple"]),
+      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("bright-purple"))(c(0.5))
     ),
     name = "Ethnicity"
   ) +
@@ -339,6 +347,284 @@ govukhugo::render_svg(
 )
 ```
 {{< /tab >}}
+{{< tab title="Departmental groups" heading="hide" ref="ethnicity-dept-table">}}
+```{r ethnicity_dept_table}
+ethnicity_dept_table <- ethnicity_org %>%
+  filter(ethnicity != "All declared" & ethnicity != "All employees") %>%
+  mutate(ethnicity = fct_relevel(ethnicity, "White", "Ethnic minority",
+                                 "Not declared", "Not reported")) %>%
+  group_by(dept_group, ethnicity) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(
+    valid = if_else(
+      ethnicity == "White" | ethnicity == "Ethnic minority",
+      value,
+      NA_real_),
+    pc_eth = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  select(-valid) %>%
+  arrange(dept_group, ethnicity)
+
+govukhugo::govuk_datatable(
+  ethnicity_dept_table,
+  title = "Civil Service headcount by departmental group and ethnicity",
+  col_names = c("Departmental group", "Ethnicity", "Headcount", 
+                "Percent of departmental group"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+```
+{{< /tab >}}
+{{< tab title="Organisations" heading="hide" ref="ethnicity-org-table">}}
+```{r ethnicity_org_table}
+ethnicity_org_table <- ethnicity_org %>%
+  filter(ethnicity != "All declared" & ethnicity != "All employees") %>%
+  mutate(ethnicity = fct_relevel(ethnicity, "White", "Ethnic minority",
+                                 "Not declared", "Not reported")) %>%
+  group_by(organisation) %>%
+  mutate(
+    valid = if_else(
+      ethnicity == "White" | ethnicity == "Ethnic minority",
+      value,
+      NA_real_),
+    pc_eth = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  select(-valid) %>%
+  arrange(dept_group, organisation, ethnicity)
+
+govukhugo::govuk_datatable(
+  ethnicity_org_table,
+  title = "Civil Service headcount by organisation and ethnicity",
+  col_names = c("Departmental group", "Organisation", "Ethnicity", "Headcount", 
+                "Percent of organisation"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 4, digits = 0) %>%
+  DT::formatPercentage(columns = 5, digits = 1)
+```
+{{< /tab >}}
 {{< /tabset >}}
 :::
 ::::
+
+## National identity
+
+```{r natid_setup}
+# ACSES 2021 separates Chinese from Asian, this is not in line with GSS
+# harmonised standards
+natid_grade <- acses2021 %>%
+  filter(source_table == "table_05" & 
+           national_identity != "All employees") %>%
+  mutate(
+    responsibility_level = fct_relevel(
+      responsibility_level, "Senior Civil Service Level", "Grades 6 and 7",
+      "Senior and Higher Executive Officers", "Executive Officers",
+      "Administrative Officers and Assistants", "Not reported",
+      "All employees"
+    ),
+    national_identity = fct_relevel(
+      national_identity, "British or Mixed British", "English", "Northern Irish",
+      "Scottish", "Welsh", "Other national identity", "Not declared", 
+      "Not reported"
+    ),
+    valid = if_else(
+      national_identity == "Not declared" | national_identity == "Not reported",
+      NA_real_,
+      value
+    )
+  ) %>%
+  group_by(responsibility_level) %>%
+  mutate(
+    pc_natid = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  select(responsibility_level, national_identity, value, pc_natid) %>%
+  arrange(responsibility_level, national_identity)
+
+natid_totals <- natid_grade %>%
+  filter(responsibility_level == "All employees") %>%
+  select(-responsibility_level)
+
+natid_missing <- natid_grade %>%
+  mutate(
+    status = if_else((national_identity == "Not declared" | 
+                       national_identity == "Not reported"),
+                     "Not provided",
+                     "Provided")
+  ) %>%
+  group_by(responsibility_level, status) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(pc_miss = value/sum(value)) %>%
+  ungroup() %>%
+  arrange(responsibility_level, status)
+  
+
+```
+
+As at 31 March 2021 there were `r scales::comma(natid_totals$value[natid_totals$national_identity == "Other national identity"], 1)` civil servants that had a national identity from outside the United Kingdom[^2], equating to `r scales::percent(natid_totals$pc_natid[natid_totals$national_identity == "Other national identity"], 0.1)` of those with a known national identity.[^3]
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="natid-chart">}}
+```{r natid_chart}
+
+natid_plot_df <- natid_totals %>%
+  mutate(
+    chart_label = paste0(national_identity, " (", scales::comma(value, 1), ")"),
+    chart_label = fct_rev(fct_reorder(chart_label, as.numeric(national_identity)))
+  )
+
+natid_plot_colours <- c(
+  scales::gradient_n_pal(govukhugo::govuk_palette("blues"))(scales::rescale(1:5)),
+  govukhugo::govuk_colours["orange"],
+  rep(govukhugo::govuk_colours["mid-grey"], 2)
+)
+
+names(natid_plot_colours) <- levels(natid_totals$national_identity)
+
+natid_plot <- ggplot(natid_plot_df,
+                     aes(x = chart_label, y = value, fill = national_identity)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = natid_plot_colours) +
+  theme_void() +
+  coord_flip() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  natid_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by national identity",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by national identity",
+    "The bars are ordered with the bar for British or Mixed British first",
+    "followed by bars for other UK national identities in alphabetical order",
+    "(English, Northern Irish, Scottish, Welsh) followed by a bar for those",
+    "with another national identity (that is, they do not have a UK national",
+    "identity). Finally two bars to show missing values, one bar to show those",
+    "whose have chosen not to declare their national identity and one bar to",
+    "show those whose national identity is not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="natid-table">}}
+```{r natid_table}
+
+govukhugo::govuk_datatable(
+  natid_totals,
+  title = "Civil Service headcount by national identity",
+  col_names = c("National identity", "Headcount", "Percent"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 2, digits = 0) %>%
+  DT::formatPercentage(columns = 3, digits = 1)
+
+```
+{{< /tab>}}
+{{< /tabset >}}
+:::
+::::
+
+The proportion of staff with known national identity who declare a national identity from outside the United Kingdom is broadly similar across responsibility levels. However, at junior responsibility levels data on national identity is less likely to be available than for those at senior levels.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="natid-grade-chart">}}
+```{r natid_grade_chart}
+
+natid_grade_plot_df <- natid_grade %>%
+  filter(responsibility_level != "Not reported" & 
+           responsibility_level != "All employees" &
+           national_identity != "British or Mixed British") %>%
+  drop_na(pc_natid) %>%
+  mutate(chart_label = if_else(pc_natid < 0.02, NA_character_, 
+                               scales::percent(pc_natid, 1))) %>%
+  arrange(responsibility_level, national_identity)
+
+natid_grade_plot_colours <- c(
+  scales::gradient_n_pal(govukhugo::govuk_palette("blues"))(scales::rescale(1:5)),
+  govukhugo::govuk_colours["orange"]
+)
+
+natid_grade_plot_colours <- natid_plot_colours[2:6]
+
+natid_grade_plot <- ggplot(natid_grade_plot_df,
+                     aes(x = fct_rev(responsibility_level), y = pc_natid, fill = fct_rev(national_identity))) +
+  geom_col() +
+  geom_text(aes(label = chart_label), position = position_stack(vjust = 0.5),
+            colour = govukhugo::govuk_colours["white"]) +
+  scale_fill_manual(
+    values = natid_grade_plot_colours,
+    name = "National identity",
+    guide = guide_legend(nrow = 2, direction = "horizontal", byrow = TRUE)
+  ) +
+  theme_void() +
+  coord_flip() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top"
+  )
+
+govukhugo::render_svg(
+  natid_grade_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by responsibility level and national identity",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by national identity",
+    "The bars are ordered with the bar for British or Mixed British first",
+    "followed by bars for other UK national identities in alphabetical order",
+    "(English, Northern Irish, Scottish, Welsh) followed by a bar for those",
+    "with another national identity (that is, they do not have a UK national",
+    "identity). Finally two bars to show missing values, one bar to show those",
+    "whose have chosen not to declare their national identity and one bar to",
+    "show those whose national identity is not reported."
+  ),
+  caption = "alt_title"
+)
+```
+<p class="govuk-body-s">Chart excludes those who declared their national identity as British or Mixed British.</p>
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="natid-grade-table">}}
+```{r natid_grade_table}
+
+natid_grade_table <- natid_grade %>%
+  filter(responsibility_level != "All employees")
+
+govukhugo::govuk_datatable(
+  natid_grade_table,
+  title = "Civil Service headcount by responsibility level and national identity",
+  col_names = c("Responsibility level", "National identity", "Headcount", "Percent"),
+    page_length = 8,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+
+```
+{{< /tab>}}
+:::
+::::
+
+
+[^1]: The Civil Service Statistics record two types of missing value for ethnicity and national identity. Where an individual has specifically chosen not to provide their ethnicity or national identity, for example by selecting a "Prefer not to say" value, this is recorded as "Not declared". Where an individual has not provided any data on their ethnicity or national identity, including not selecting a "Prefer not to say" value, this is recorded as "Not reported".
+[^2]: That is they have declared that their ethnicity is not any of the following: British or Mixed British, English, Northern Irish, Scottish, or Welsh.
+[^3]: National identity has two missing values, "not declared" and "not reported", see endnote [1](#fn1) for more details. There are `r scales::comma(natid_missing$value[natid_missing$responsibility_level == "All employees" & natid_missing$status == "Not provided"], 1)` individuals whose national identity is either not declared or not reported, which is `r scales::percent(natid_missing$pc_miss[natid_missing$responsibility_level == "All employees" & natid_missing$status == "Not provided"], 0.1)` of total headcount.
