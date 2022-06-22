@@ -196,7 +196,15 @@ govukhugo::render_svg(
   height = 200,
   alt_title = "Civil Service headcount by ethnicity and responsibility level",
   alt_desc = paste(
-    "A bar chart showing Civil Service headcount by ethnicity."
+    "A stacked bar chart showing Civil Service headcount by responsibility level",
+    "and ethnicity. Bars represent the proportion of civil servants in",
+    "each responsibility level that have declared their ethnicity as White",
+    "(the bar starting on the left) and those that have declared their ethnicity",
+    "as an ethnic minority (the bar starting on the right). The bars are ordered",
+    "by responsibility level with the most senior level at the top and",
+    "administrative staff at the bottom. The chart does not include",
+    "data for where either responsbility level or ethnicity are not",
+    "declared or reported."
   ),
   caption = "alt_title"
 )
@@ -589,14 +597,15 @@ govukhugo::render_svg(
   height = 200,
   alt_title = "Civil Service headcount by responsibility level and national identity",
   alt_desc = paste(
-    "A bar chart showing Civil Service headcount by national identity",
-    "The bars are ordered with the bar for British or Mixed British first",
-    "followed by bars for other UK national identities in alphabetical order",
-    "(English, Northern Irish, Scottish, Welsh) followed by a bar for those",
-    "with another national identity (that is, they do not have a UK national",
-    "identity). Finally two bars to show missing values, one bar to show those",
-    "whose have chosen not to declare their national identity and one bar to",
-    "show those whose national identity is not reported."
+    "A stacked bar chart showing Civil Service headcount by responsibility level",
+    "and national identity. Bars represent the proportion of civil servants in",
+    "each responsibility level that have a declared national identity that is",
+    "not British or Mixed British (that is, either English, Northern Irish,)",
+    "Welsh, Scottish or another national identity. Bars are sorted by",
+    "responsibility level with the most senior level at the top and",
+    "administrative staff at the bottom. The chart does not include",
+    "data for where either responsbility level or national identity are not",
+    "declared or reported."
   ),
   caption = "alt_title"
 )

@@ -89,7 +89,7 @@ disability_plot <- ggplot(disability_plot_df, aes(x = fct_rev(chart_label), y = 
 govukhugo::render_svg(
   disability_plot,
   width = 800,
-  height = 200,
+  height = 100,
   alt_title = "Civil Service headcount by disability status",
   alt_desc = paste(
     "A bar chart showing Civil Service headcount by disability status",
@@ -119,5 +119,85 @@ govukhugo::govuk_datatable(
 :::
 ::::
 
+At the Executive Officer responsibility level `r scales::percent(disability_grade$pc_disabled[disability_grade$responsibility_level == "Executive Officers" & disability_grade$disability == "Disabled"], 0.1)` have declared they are disabled, almost double the proportion of those at Senior Civil Service Level that declared they are disabled (`r scales::percent(disability_grade$pc_disabled[disability_grade$responsibility_level == "Senior Civil Service Level" & disability_grade$disability == "Disabled"], 0.1)`).
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="disability-grade-chart">}}
+```{r disability_grade_chart}
+
+disability_grade_plot_df <- disability_grade %>%
+  filter(responsibility_level != "All employees" &
+           responsibility_level != "Not reported") %>%
+  drop_na(pc_disabled) %>%
+  mutate(pc_label = scales::percent(pc_disabled, 1))
+
+disability_grade_plot <- ggplot(
+  disability_grade_plot_df,
+  aes(x = fct_rev(responsibility_level), y = pc_disabled, fill = disability)
+  ) +
+  geom_col(position = "fill") +
+  geom_text(aes(label = pc_label), 
+            position = position_fill(vjust = 0.5),
+            colour = govukhugo::govuk_colours["white"]) +
+  scale_fill_manual(
+    values = c(
+      "Non-disabled" = unname(govukhugo::govuk_colours["green"]),
+      "Disabled" = scales::gradient_n_pal(govukhugo::govuk_palette("green"))(c(0.5))
+    ),
+    name = "Disability status"
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top",
+    legend.direction = "horizontal"
+  )
+
+govukhugo::render_svg(
+  disability_grade_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by disability status and responsibility level",
+  alt_desc = paste(
+    "A stacked bar chart showing Civil Service headcount by responsibility level",
+    "and disability status Bars represent the proportion of civil servants in",
+    "each responsibility level that have declared they are non-disabled",
+    "(the bar starting on the left) and those that have declared they are",
+    "disabled (the bar starting on the right). The bars are ordered",
+    "by responsibility level with the most senior level at the top and",
+    "administrative staff at the bottom. The chart does not include",
+    "data for where either responsbility level or disability status are not",
+    "declared or reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab>}}
+{{< tab title="Table" heading="hide" ref="disability-grade-table">}}
+```{r disability_grade_table}
+
+disability_grade_table <- disability_grade %>%
+  filter(responsibility_level != "All employees")
+
+govukhugo::govuk_datatable(
+  disability_grade_table,
+  title = "Civil Service headcount by responsibility level and disability status",
+  col_names = c("Responsibility level", "Disability status", "Headcount", "Percent"),
+    page_length = 8,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+```
+{{< /tab>}}
+{{< /tabset >}}
+:::
+::::
 
 [^1]: The Civil Service Statistics record two types of missing value for disability status. Where an individual has specifically chosen not to provide their disability status, for example by selecting a "Prefer not to say" value, this is recorded as "Not declared". Where an individual has not provided any data on their disability status, including not selecting a "Prefer not to say" value, this is recorded as "Not reported".
