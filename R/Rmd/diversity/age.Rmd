@@ -79,8 +79,8 @@ age_chart_df <- acses2021 %>%
 
 age_plot <- ggplot(age_chart_df,
                    aes(x = chart_label, y = bar_width)) +
-  geom_col(fill = govukhugo::govuk_colours["dark-blue"]) +
-  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["dark-blue"]) +
+  geom_col(fill = govukhugo::govuk_colours["red"]) +
+  geom_col(aes(y = -bar_width), fill = govukhugo::govuk_colours["red"]) +
   geom_text(aes(label = chart_label), hjust = 0, nudge_y = 5000, size = 4) +
   scale_y_continuous(limits = c(-75000, 150000), expand = expansion()) +
   coord_flip() +
@@ -200,7 +200,7 @@ age_grade_plot <- ggplot(age_grade_plot_df,
     colour = govukhugo::govuk_colours["govuk-secondary-text-colour"]
   ) +
   scale_fill_discrete(
-    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(scales::rescale(1:5))),
+    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("red"))(scales::rescale(1:5))),
     name = "Age band"
   ) +
   scale_x_discrete(expand = expansion(add = c(0,1))) +
@@ -415,7 +415,7 @@ age_dept_plot <- ggplot(age_dept_plot_df,
             show.legend = FALSE,
             colour = "white") +
   scale_fill_discrete(
-    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(scales::rescale(1:5))),
+    type = rev(scales::gradient_n_pal(govukhugo::govuk_palette("red"))(scales::rescale(1:5))),
     name = "Age band"
   ) +
   coord_flip() +

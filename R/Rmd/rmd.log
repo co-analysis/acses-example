@@ -1,9 +1,9 @@
-R/Rmd/diversity/age.Rmd: fa3c19e4b5fbbc9794a219b837e395b0
-R/Rmd/diversity/disability.Rmd: 5cb4a2656ee24d77d5d2217de6a2fed1
-R/Rmd/diversity/ethnicity.Rmd: 18812edc16830debcd148f76e4d783be
+R/Rmd/diversity/age.Rmd: db0f63ea65c2ab9e34a834dd7e01e8c6
+R/Rmd/diversity/disability.Rmd: ea5d704ba3e72d5686a170744d0f698e
+R/Rmd/diversity/ethnicity.Rmd: 4b824c97de152dd9bef085819cbc6e5a
 R/Rmd/diversity/religion_belief.Rmd: abf5693444f10be7a9587e45d8d0dabc
 R/Rmd/diversity/sex.Rmd: 89cd09333463eb99e8b47fa1193583d6
-R/Rmd/diversity/sexual_orientation.Rmd: 42410b9785d73dd17bdf8ea18a7d8217
+R/Rmd/diversity/sexual_orientation.Rmd: 1e0c8b7fa0d721a54854c572a4eedb3a
 R/Rmd/location/_index.Rmd: 04642eac9048275c5a3d53a3643e7d1e
 R/Rmd/location/country_region.Rmd: d97d1308852ec6e657cb5a541552324c
 R/Rmd/location/diversity.Rmd: b3d8a1c6e73a995b8a6b0d3e5e85a7f6

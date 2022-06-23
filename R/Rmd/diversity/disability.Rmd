@@ -75,7 +75,7 @@ disability_plot <- ggplot(disability_plot_df, aes(x = fct_rev(chart_label), y = 
   geom_col(show.legend = FALSE) +
   scale_fill_manual(
     values = c(
-      "Provided" = unname(govukhugo::govuk_colours["green"]),
+      "Provided" = unname(govukhugo::govuk_colours["light-purple"]),
       "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
     )) +
   theme_void() +
@@ -101,7 +101,7 @@ govukhugo::render_svg(
 )
 
 ```
-{{< /tab>}}
+{{< /tab >}}
 {{< tab title="Table" heading="hide" ref="disability-table">}}
 ```{r disability_table}
 govukhugo::govuk_datatable(
@@ -114,7 +114,7 @@ govukhugo::govuk_datatable(
   DT::formatRound(columns = 2, digits = 0) %>%
   DT::formatPercentage(columns = 3, digits = 1)
 ```
-{{< /tab>}}
+{{< /tab >}}
 {{< /tabset >}}
 :::
 ::::
@@ -143,8 +143,8 @@ disability_grade_plot <- ggplot(
             colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "Non-disabled" = unname(govukhugo::govuk_colours["green"]),
-      "Disabled" = scales::gradient_n_pal(govukhugo::govuk_palette("green"))(c(0.5))
+      "Non-disabled" = unname(govukhugo::govuk_colours["light-purple"]),
+      "Disabled" = scales::gradient_n_pal(govukhugo::govuk_palette("light-purple"))(c(0.5))
     ),
     name = "Disability status"
   ) +
@@ -178,7 +178,7 @@ govukhugo::render_svg(
 )
 
 ```
-{{< /tab>}}
+{{< /tab >}}
 {{< tab title="Table" heading="hide" ref="disability-grade-table">}}
 ```{r disability_grade_table}
 
@@ -195,7 +195,177 @@ govukhugo::govuk_datatable(
   DT::formatRound(columns = 3, digits = 0) %>%
   DT::formatPercentage(columns = 4, digits = 1)
 ```
-{{< /tab>}}
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+```{r disability_dept_setup}
+
+disability_org <- acses2021 %>%
+  filter(source_table == "table_38" &
+           organisation != "All employees" &
+           disability != "All employees" &
+           disability != "All declared") %>%
+  left_join(group_lookup, by = "organisation") %>%
+  select(dept_group, organisation, disability, value) %>%
+  mutate(
+    disability = fct_relevel(
+      disability, "Disabled", "Non-disabled", "Not declared", 
+      "Not reported"
+    )
+  )
+
+disability_dept <- disability_org %>%
+  group_by(dept_group, disability) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(
+    valid = if_else(disability == "Disabled" | disability == "Non-disabled",
+                    value, 
+                    NA_real_),
+    pc_disability = valid/sum(valid, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  add_count(dept_group, wt = value, name = "group_reported")
+
+disability_top3 <- disability_dept %>%
+  filter(disability == "Disabled" & group_reported > 1500) %>%
+  slice_max(pc_disability, n = 3) %>%
+  mutate(
+    out_text = paste0(
+      dept_group, " (", 
+      scales::percent(janitor::round_half_up(pc_disability, 3), 0.1),
+      ")"
+    )
+  )
+
+disability_bottom3 <- disability_dept %>%
+  filter(disability == "Disabled" & group_reported > 1500) %>%
+  slice_min(pc_disability, n = 3) %>%
+  mutate(
+    out_text = paste0(
+      dept_group, " (", 
+      scales::percent(janitor::round_half_up(pc_disability, 3), 0.1),
+      ")"
+    )
+  )
+
+```
+
+The three departmental groups with the largest proportion of staff reporting they have a disability are: `r glue::glue_collapse(disability_top3$out_text, sep = "; ", last = " and, ")`. The three departmental groups with the smallest proportion of staff reporting they have a disability are: `r glue::glue_collapse(disability_bottom3$out_text, sep = "; ", last = " and, ")`.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="disabilty-dept-chart">}}
+```{r disability_dept_chart}
+
+disability_dept_plot_df <- disability_dept %>%
+  filter(disability == "Disabled" | disability == "Non-disabled") %>%
+  mutate(
+    dept_chart_group = case_when(
+      group_reported < 1500 ~ "Other departments and agencies",
+      grepl("Standards in Education", dept_group) ~ "Ofsted",
+      TRUE ~ dept_group),
+    dept_chart_group = fct_reorder(dept_chart_group, group_reported, .fun = max)
+  ) %>%
+  group_by(dept_chart_group, disability) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(pc_disability = value/sum(value)) %>%
+  ungroup() %>%
+  mutate(
+    pc_label = if_else(
+      pc_disability < 0.1,
+      NA_character_,
+      scales::percent(janitor::round_half_up(pc_disability, 2), 1)
+    )
+  )
+
+disability_dept_plot <- ggplot(
+  disability_dept_plot_df,
+  aes(x = dept_chart_group, y = pc_disability, fill = disability)
+  ) +
+  geom_col(position = "fill") +
+  geom_text(aes(label = pc_label), 
+            position = position_fill(vjust = 0.5),
+            colour = govukhugo::govuk_colours["white"]) +
+  scale_fill_manual(
+    values = c(
+      "Non-disabled" = unname(govukhugo::govuk_colours["light-purple"]),
+      "Disabled" = scales::gradient_n_pal(govukhugo::govuk_palette("light-purple"))(c(0.5))
+    ),
+    name = "Disability status"
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top",
+    legend.direction = "horizontal"
+  )
+
+govukhugo::render_svg(
+  disability_dept_plot,
+  width = 800,
+  height = 600,
+  alt_title = "Civil Service headcount by disability status and departmental group",
+  alt_desc = paste(
+    "TO WRITE"
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Departmental groups" heading="hide" ref="disabilty-dept-table">}}
+```{r disability_dept_table}
+disability_dept_table <- disability_dept %>%
+  select(dept_group, disability, value, pc_disability) %>%
+  arrange(dept_group, disability)
+
+govukhugo::govuk_datatable(
+  disability_dept_table,
+  title = "Civil Service headcount by departmental group and disability status",
+  col_names = c("Departmental group", "Disability status", "Headcount", 
+                "Percent of departmental group"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+```
+{{< /tab >}}
+{{< tab title="Organisations" heading="hide" ref="disabilty-org-table">}}
+```{r disability_org_table}
+
+disability_org_table <- disability_org %>%
+  mutate(valid = if_else(disability == "Disabled" | disability == "Non-disabled",
+                         value,
+                         NA_real_)
+  ) %>%
+  group_by(organisation) %>%
+  mutate(
+    pc_disability = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  select(dept_group, organisation, disability, value, pc_disability) %>%
+  arrange(dept_group, organisation, disability)
+
+govukhugo::govuk_datatable(
+  disability_org_table,
+  title = "Civil Service headcount by organisation and disability status",
+  col_names = c("Departmental group", "Organisation", "Disability status",
+                "Headcount", "Percent of organisation"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 4, digits = 0) %>%
+  DT::formatPercentage(columns = 5, digits = 1)
+
+```
+{{< /tab >}}
 {{< /tabset >}}
 :::
 ::::

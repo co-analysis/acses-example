@@ -79,7 +79,7 @@ ethnicity_plot <- ggplot(ethnicity_plot_df, aes(x = chart_label, y = value,
   geom_col(show.legend = FALSE) +
   scale_fill_manual(
     values = c(
-      "Provided" = unname(govukhugo::govuk_colours["bright-purple"]),
+      "Provided" = unname(govukhugo::govuk_colours["green"]),
       "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
     )) +
   theme_void() +
@@ -175,8 +175,8 @@ ethnicity_grade_plot <- ggplot(ethnicity_grade_plot_df,
             colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "White" = unname(govukhugo::govuk_colours["bright-purple"]),
-      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("bright-purple"))(c(0.5))
+      "White" = unname(govukhugo::govuk_colours["green"]),
+      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("green"))(c(0.5))
     ),
     name = "Ethnicity"
   ) +
@@ -328,8 +328,8 @@ ethnicity_dept_plot <- ggplot(ethnicity_dept_plot_df,
             colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "White" = unname(govukhugo::govuk_colours["bright-purple"]),
-      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("bright-purple"))(c(0.5))
+      "White" = unname(govukhugo::govuk_colours["green"]),
+      "Ethnic minority" = scales::gradient_n_pal(govukhugo::govuk_palette("green"))(c(0.5))
     ),
     name = "Ethnicity"
   ) +

@@ -8,7 +8,239 @@ summary: "Headline statistics for civil servants by sexual orientation"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
+orientation_grade <- acses2021 %>%
+  filter(source_table == "table_a2" &
+           sexual_orientation != "All employees" & 
+           sexual_orientation != "All declared") %>%
+  mutate(
+    sexual_orientation = fct_relevel(
+      sexual_orientation, "Heterosexual/Straight", "Gay/Lesbian",
+      "Bisexual", "Other", "Not declared", "Not reported"
+    ),
+    valid = if_else(
+      sexual_orientation == "Not declared" | sexual_orientation == "Not reported",
+      NA_real_,
+      value
+    ),
+    major_group = case_when(
+      sexual_orientation == "Not declared" ~ "Not provided",
+      sexual_orientation == "Not reported" ~ "Not provided",
+      sexual_orientation == "Heterosexual/Straight" ~ "Heterosexual",
+      TRUE ~ "LGBO"
+    )
+  )
+
+orientation_totals <- orientation_grade %>%
+  filter(responsibility_level == "All employees") %>%
+  group_by(major_group) %>%
+  summarise(value = sum(value), .groups = "drop") %>%
+  mutate(
+    valid = if_else(
+      major_group == "Not provided",
+      NA_real_,
+      value
+    ),
+    pc_valid = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3),
+    pc_all = janitor::round_half_up(value/sum(value), 3)
+  )
+
 ```
 
-Holding page
+As at 31 March 2021, there were `r scales::comma(orientation_totals$value[orientation_totals$major_group == "LGBO"], 1)` who declared their sexual orientation as either lesbian, gay, bisexual or something else other than heterosexual/straight, this equates to `r scales::percent(orientation_totals$pc_valid[orientation_totals$major_group == "LGBO"], 0.1)` of those who declared their sexual orientation.[^1]
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="orientation-chart">}}
+```{r orientation_chart}
+orientation_plot_df <- orientation_grade %>%
+  filter(responsibility_level == "All employees") %>%
+  select(sexual_orientation, value) %>%
+  mutate(
+    fill_group = if_else(
+      sexual_orientation == "Not declared" | sexual_orientation == "Not reported",
+      "Not provided",
+      "Provided"
+    ),
+    chart_label = paste0(sexual_orientation, " (", scales::comma(value, 1), ")"),
+    chart_label = fct_reorder(chart_label, as.numeric(sexual_orientation))
+  )
+
+orientation_plot <- ggplot(orientation_plot_df, 
+                           aes(x = fct_rev(chart_label), y = value, fill = fill_group)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(
+    values = c(
+      "Provided" = unname(govukhugo::govuk_colours["dark-blue"]),
+      "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
+    )) +
+  theme_void() +
+  coord_flip() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  orientation_plot,
+  width = 800,
+  height = 150,
+  alt_title = "Civil Service headcount by sexual orientation",
+  alt_desc = paste(
+    "A bar chart showing Civil Service headcount by sexual orientation",
+    "After the bars for sexual orientations there is one bar to show those",
+    "whose have chosen not to declare their sexual orientation and one bar to",
+    "show those whose sexual orientation is not reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="orientation-table">}}
+```{r orientation_table}
+
+orientation_table <- orientation_grade %>%
+  filter(responsibility_level == "All employees") %>%
+  mutate(pc_orientation = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)) %>%
+  select(sexual_orientation, value, pc_orientation) %>%
+  arrange(sexual_orientation)
+
+govukhugo::govuk_datatable(
+  orientation_table,
+  title = "Civil Service headcount by sexual orientation",
+  col_names = c("Sexual orientation", "Headcount", "Percent"),
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 2, digits = 0) %>%
+  DT::formatPercentage(columns = 3, digits = 1)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+The proportion of staff who declared their sexual orientation as either lesbian, gay, bisexual or something else other than heterosexual/straight is similar across responsibility levels.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="orientation-grade-chart">}}
+```{r orientation_grade_chart}
+orientation_grade_plot_df <- orientation_grade %>%
+  filter(responsibility_level != "All employees" &
+           responsibility_level != "Not reported" &
+           major_group != "Not provided") %>%
+  group_by(responsibility_level, major_group) %>%
+  summarise(value = sum(value), .groups = "drop_last") %>%
+  mutate(pc_orientation = value/sum(value)) %>%
+  ungroup() %>%
+  mutate(
+    responsibility_level = fct_relevel(
+      responsibility_level, "Senior Civil Service Level", "Grades 6 and 7",
+      "Senior and Higher Executive Officers", "Executive Officers",
+      "Administrative Officers and Assistants"
+    ),
+    major_group = factor(major_group,
+                         levels = c("Heterosexual", "LGBO"),
+                         labels = c("Heterosexual/straight",
+                                    "Lesbian, gay, bisexual or other")),
+    pc_label = scales::percent(janitor::round_half_up(pc_orientation, 2), 1)
+  )
+
+orientation_grade_plot <- ggplot(
+  orientation_grade_plot_df,
+  aes(x = fct_rev(responsibility_level), y = pc_orientation, fill = fct_rev(major_group))
+  ) +
+  geom_col(position = "fill") +
+  geom_text(aes(label = pc_label), 
+            position = position_fill(vjust = 0.5),
+            colour = govukhugo::govuk_colours["white"]) +
+  scale_fill_manual(
+    values = c(
+      "Heterosexual/straight" = unname(govukhugo::govuk_colours["dark-blue"]),
+      "Lesbian, gay, bisexual or other" =
+        scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(c(0.5))
+    ),
+    name = "Sexual orientation"
+  ) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(hjust = 1),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    legend.position = "top",
+    legend.direction = "horizontal"
+  )
+
+govukhugo::render_svg(
+  orientation_grade_plot,
+  width = 800,
+  height = 200,
+  alt_title = "Civil Service headcount by sexual orientation and responsibility level",
+  alt_desc = paste(
+    "A stacked bar chart showing Civil Service headcount by responsibility level",
+    "and sexual orientation. Bars represent the proportion of civil servants in",
+    "each responsibility level that have declared they are heterosexual/straight",
+    "(the bar starting on the left) and those that have declared they are",
+    "lesbian, gay, bisexual or another sexual orientation (the bar starting on",
+    "the right). The bars are ordered by responsibility level with the most",
+    "senior level at the top and administrative staff at the bottom. The chart",
+    "does not include data for where either responsbility level or sexual",
+    "orientation are not declared or reported."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="orientation-table-chart">}}
+```{r orientation_grade_table}
+orientation_grade_table <- orientation_grade %>%
+  filter(responsibility_level != "All employees") %>%
+  group_by(responsibility_level) %>%
+  mutate(
+    valid = if_else(major_group == "Not provided", NA_real_, value),
+    pc_orientation = janitor::round_half_up(valid/sum(valid, na.rm = TRUE), 3)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    responsibility_level = fct_relevel(
+      responsibility_level, "Senior Civil Service Level", "Grades 6 and 7",
+      "Senior and Higher Executive Officers", "Executive Officers",
+      "Administrative Officers and Assistants", "Not reported"
+    )
+  ) %>%
+  select(responsibility_level, sexual_orientation, value, pc_orientation) %>%
+  arrange(responsibility_level, sexual_orientation)
+
+govukhugo::govuk_datatable(
+  orientation_grade_table,
+  title = "Civil Service headcount by responsibility level and sexual orientation",
+  col_names = c("Responsibility level", "Sexual orientation", "Headcount", "Percent"),
+    page_length = 12,
+    search = FALSE
+) %>%
+  DT::formatRound(columns = 3, digits = 0) %>%
+  DT::formatPercentage(columns = 4, digits = 1)
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+[^1]: The Civil Service Statistics record two types of missing value for sexual orientation. Where an individual has specifically chosen not to provide their sexual orientation, for example by selecting a "Prefer not to say" value, this is recorded as "Not declared". Where an individual has not provided any data on their sexual orientation, including not selecting a "Prefer not to say" value, this is recorded as "Not reported". There are `r scales::comma(orientation_totals$value[orientation_totals$major_group == "Not provided"], 1)` individuals whose sexual orientation is either not declared or not reported, which is `r scales::percent(orientation_totals$pc_all[orientation_totals$major_group == "Not provided"], 0.1)` of total headcount.
