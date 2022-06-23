@@ -855,17 +855,6 @@ descending order.</p>
     };
     let number_of_selections = 0;
 
-    Papa.parse(
-        "../../files/acses2021_processed.csv", {
-            header: true,
-            download: true,
-            complete: function (results, file) {
-                csv_data = results.data;
-                csv_columns = Object.keys(csv_data[0]);
-            }
-        }
-    );
-
     let table_variables = {
         table_01: ["responsibility_level", "sex", "working_pattern"],
         table_02: ["ethnicity", "responsibility_level"],
@@ -1130,6 +1119,17 @@ descending order.</p>
         working_pattern: ["Full-time", "Part-time", "All employees", "All Employees"]
     }
 
+    Papa.parse(
+        "../../files/acses2021_processed.csv", {
+            header: true,
+            download: true,
+            complete: function (results, file) {
+                csv_data = results.data;
+                csv_columns = Object.keys(csv_data[0]);
+            }
+        }
+    );
+
     function select_table() {
 
         reset_categories()
@@ -1241,14 +1241,6 @@ descending order.</p>
         filter_res = csv_data;
 
         filter_res = filter_res.filter(data => data.source_table == $("#filter_source_table option:selected").val());
-
-        /*
-        Object.keys(category_selections).forEach(function (variable) {
-            if (category_selections[variable].length "") {
-                filter_res = filter_res.filter(data => data[variable] == category_selections[variable]);
-            }
-        });
-        */
 
         Object.keys(category_selections).forEach(function (variable) {
             if (category_selections[variable].length > 0) {
