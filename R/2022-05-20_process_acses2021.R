@@ -1,5 +1,13 @@
 # process 2021 published tables
 
+### REQUIRES DEVELOPMENT VERSION OF readODS
+### The current CRAN version of readODS includes a bug that
+### means the number-rows-repeated attribute is considered
+### a marker for blank rows not a sequential set of rows with
+### identical values and causes errors when there is whitespace replication
+
+# remotes::install_github("mattkerlogue/readODS@fix-whitespace")
+
 library(tidyverse)
 
 ods_file <- file.path(
@@ -1337,8 +1345,8 @@ processed_tables$table_38 <- readODS::read_ods(
   set_names(
     c(
       "organisation",
-      "White",
-      "Ethnic minority",
+      "Disabled",
+      "Non-disabled",
       "Not declared",
       "Not reported",
       "All employees",
@@ -1346,7 +1354,7 @@ processed_tables$table_38 <- readODS::read_ods(
     )
   ) %>%
   as_tibble() %>%
-  pivot_longer(cols = -organisation, names_to = "ethnicity") %>%
+  pivot_longer(cols = -organisation, names_to = "disability") %>%
   drop_na(value) %>%
   mutate(
     value_type = "headcount",
@@ -1758,8 +1766,14 @@ aggregate_tables <- bind_rows(processed_tables,
 # write csv ----
 
 write_csv(aggregate_tables,
-  "R/data/acses2021_processed.csv",
+  file.path("R", "data", "acses2021_processed.csv"),
   na = "All employees"
+)
+
+file.copy(
+  file.path("R", "data", "acses2021_processed.csv"),
+  file.path("static", "files", "acses2021_processed.csv"),
+  overwrite = TRUE
 )
 
 ### END NOTES ----

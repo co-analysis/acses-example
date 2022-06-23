@@ -1,12 +1,12 @@
 # process postcode file
 
-### REQUIRES FEVELOPMENT VERSION OF readODS
+### REQUIRES DEVELOPMENT VERSION OF readODS
 ### The current CRAN version of readODS includes a bug that
 ### means the number-rows-repeated attribute is considered
 ### a marker for blank rows not a sequential set of rows with
-### identical values
+### identical values and causes errors when there is whitespace replication
 
-# remotes::install_github("chainsawriot/readODS/")
+# remotes::install_github("mattkerlogue/readODS@fix-whitespace")
 
 library(tidyverse)
 
