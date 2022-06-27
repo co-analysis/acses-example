@@ -82,7 +82,7 @@ orientation_plot <- ggplot(orientation_plot_df,
   geom_col(show.legend = FALSE) +
   scale_fill_manual(
     values = c(
-      "Provided" = unname(govukhugo::govuk_colours["dark-blue"]),
+      "Provided" = unname(govukhugo::govuk_colours["orange"]),
       "Not provided" = unname(govukhugo::govuk_colours["mid-grey"])
     )) +
   theme_void() +
@@ -171,9 +171,9 @@ orientation_grade_plot <- ggplot(
             colour = govukhugo::govuk_colours["white"]) +
   scale_fill_manual(
     values = c(
-      "Heterosexual/straight" = unname(govukhugo::govuk_colours["dark-blue"]),
+      "Heterosexual/straight" = unname(govukhugo::govuk_colours["orange"]),
       "Lesbian, gay, bisexual or other" =
-        scales::gradient_n_pal(govukhugo::govuk_palette("dark-blue"))(c(0.5))
+        scales::gradient_n_pal(govukhugo::govuk_palette("orange"))(c(0.5))
     ),
     name = "Sexual orientation"
   ) +
@@ -208,7 +208,7 @@ govukhugo::render_svg(
 
 ```
 {{< /tab >}}
-{{< tab title="Table" heading="hide" ref="orientation-table-chart">}}
+{{< tab title="Table" heading="hide" ref="orientation-grade-table">}}
 ```{r orientation_grade_table}
 orientation_grade_table <- orientation_grade %>%
   filter(responsibility_level != "All employees") %>%
