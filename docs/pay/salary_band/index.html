@@ -1164,6 +1164,14 @@ salary is £33,720.</p>
     applyGOVUK("HR", "govuk-section-break");
 
      
+    document.querySelector("div.footnotes ol").classList.add("govuk-body-s")
+
+    var fn_p = document.querySelectorAll("div.footnotes li p")
+    for (var i = 0; i < fn_p.length; i++) {
+        fn_p[i].classList.add("govuk-body-s")
+    }
+
+     
     function styleCodeBlocks() {
         var code_elements = document.querySelectorAll("div.highlight")
         var i;

@@ -249,7 +249,7 @@
 
                 
                 <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
-                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by relgion or belief</a></li>
+                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by religion or belief</a></li>
                 
 
                 
@@ -541,7 +541,7 @@
 
                 
                 <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
-                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by relgion or belief</a></li>
+                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by religion or belief</a></li>
                 
 
                 
@@ -1344,6 +1344,14 @@ not provided.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
      
     applyGOVUK("HR", "govuk-section-break--l");
     applyGOVUK("HR", "govuk-section-break");
+
+     
+    document.querySelector("div.footnotes ol").classList.add("govuk-body-s")
+
+    var fn_p = document.querySelectorAll("div.footnotes li p")
+    for (var i = 0; i < fn_p.length; i++) {
+        fn_p[i].classList.add("govuk-body-s")
+    }
 
      
     function styleCodeBlocks() {

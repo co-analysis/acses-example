@@ -212,7 +212,7 @@
 
                 
                 <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
-                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by relgion or belief</a></li>
+                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by religion or belief</a></li>
                 
 
                 
@@ -500,7 +500,7 @@
 
                 
                 <li class="nav-item"><a class="govuk-!-font-size-14 govuk-link govuk-link--no-visited-state"
-                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by relgion or belief</a></li>
+                                href="https://co-analysis.github.io/acses-example/diversity/religion_belief/">Civil servants by religion or belief</a></li>
                 
 
                 
@@ -659,8 +659,17 @@
 <li><a href="ethnicity/" class="govuk-link" >ethnicity and national identity</a></li>
 <li><a href="disability/" class="govuk-link" >disability</a></li>
 <li><a href="sexual_orientation/" class="govuk-link" >sexual orientation</a></li>
-<li><a href="religion_belief/" class="govuk-link" >religion and belief</a></li>
+<li><a href="religion_belief/" class="govuk-link" >religion or belief</a></li>
 </ul>
+<p>On each page you will find information about the overall number of civil servants by diversity category, as well as splits by responsibility level and organisation<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>While the <a href="https://co-analysis.github.io/acses-example/data/" class="govuk-link" >statistical tables</a> include information by organisation for national identity, sexual orientation and religion or belief, due to data quality issues these bulletin pages do not include visualisations of that data.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -772,6 +781,14 @@
      
     applyGOVUK("HR", "govuk-section-break--l");
     applyGOVUK("HR", "govuk-section-break");
+
+     
+    document.querySelector("div.footnotes ol").classList.add("govuk-body-s")
+
+    var fn_p = document.querySelectorAll("div.footnotes li p")
+    for (var i = 0; i < fn_p.length; i++) {
+        fn_p[i].classList.add("govuk-body-s")
+    }
 
      
     function styleCodeBlocks() {
