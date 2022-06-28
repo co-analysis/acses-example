@@ -26,7 +26,7 @@ salary_band_all <- acses2021 %>%
   mutate(valid = if_else(salary_band == "Not reported" | salary_band == "All employees", NA_real_, value),
          pc = valid/sum(valid, na.rm = TRUE),
          cpc = cumsum(pc),
-         icpc = 1-cpc,
+         icpc = 1 - cpc,
          band_lower = as.numeric(
            str_remove_all(
              str_replace(salary_band, "^[£](\\d+),(\\d+).*$", "\\1\\2"),
@@ -139,14 +139,12 @@ govukhugo::govuk_datatable(
 {{< tab title="High earners" heading="hide" ref="high-earners-table">}}
 ```{r high_earners_table}
 
-high_earners %>%
-  mutate(value = scales::comma(value, 1)) %>%
-  knitr::kable(
-    output = "html",
-    col.names = c("Salary band", "Headcount"),
-    align = "lr",
-    caption = "Civil Service headcount in high earning salary bands"
-  )
+govukhugo::govuk_datatable(
+    high_earners,
+    title = "Civil Service headcount in high earning salary bands",
+    col_names = c("Salary band", "Headcount")
+  ) %>%
+  DT::formatRound(columns = 2, digits = 0)
 
 ```
 {{< /tab >}}

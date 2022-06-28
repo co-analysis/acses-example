@@ -9,6 +9,128 @@ summary: "Headline statistics on pay by grade and organisation"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+acses2021 <- read_csv(file.path(data_dir, "acses2021_processed.csv"))
+
+group_lookup <- read_csv(
+  file.path(data_dir, "dept_group_lookup.csv")
+)
+
+gbp_format <- scales::dollar_format(accuracy = 1, prefix = "£")
+
+grade_org_salary <- acses2021 %>%
+  filter(source_table == "table_25") %>%
+  select(responsibility_level, organisation,value_type, value) %>%
+  mutate(
+    responsibility_level = fct_relevel(
+      responsibility_level, "Senior Civil Service Level", "Grades 6 and 7", 
+      "Senior and Higher Executive Officers", "Executive Officers",
+      "Administrative Officers and Assistants", "All employees")
+  )
+
+median_salary <- grade_org_salary %>%
+  filter(organisation == "All employees" & responsibility_level == "All employees")
+
+grade_salary <- grade_org_salary %>%
+  filter(organisation == "All employees" & responsibility_level != "All employees") %>%
+  mutate(
+    chart_label = paste0(responsibility_level, " (", gbp_format(value), ")"),
+    chart_label = fct_rev(fct_reorder(chart_label, as.numeric(responsibility_level)))
+  )
+
+org_salary <- grade_org_salary %>%
+  filter(organisation != "All employees" & responsibility_level == "All employees") %>%
+  left_join(group_lookup, by = "organisation")
+
 ```
 
-Holding page
+As at 31 March 2021, the median salary by responsibility level ranged from `r gbp_format(min(grade_salary$value))` for `r grade_salary$responsibility_level[grade_salary$value == min(grade_salary$value)]` to `r gbp_format(max(grade_salary$value))` for `r grade_salary$responsibility_level[grade_salary$value == max(grade_salary$value)]`.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="grade-salary-chart">}}
+```{r grade_salary_chart}
+grade_salary_plot <- ggplot(grade_salary, aes(x = chart_label, y = value)) +
+  geom_col(fill = govukhugo::govuk_colours["blue"]) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+  )
+
+govukhugo::render_svg(
+  grade_salary_plot,
+  width = 800,
+  height = 125,
+  alt_title = "Median salary by responsibility level",
+  alt_desc = paste(
+    "A bar chart showing the median salary for each responsibility level",
+    "ordered by seniority with the most senior responsibility level at the top",
+    "and the most junior responsibility level at the bottom."
+  ),
+  caption = "alt_title"
+)
+```
+{{< /tab >}}
+{{< tab title="Table" heading="hide" ref="grade-salary-table">}}
+```{r grade_salary_table}
+grade_salary_table <- grade_salary %>%
+  select(responsibility_level, value) %>%
+  arrange(responsibility_level)
+
+govukhugo::govuk_datatable(
+    grade_salary_table,
+    title = "Median salary by responsibility level",
+    col_names = c("Responsibilty level", "Median salary"),
+    page_length = 10,
+    search = FALSE
+  ) %>%
+  DT::formatCurrency(columns = 2, currency = "£", digits = 0)
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
+
+As at 31 March 2021, the median salary by organisation ranged from `r gbp_format(min(org_salary$value))` for civil servants based at `r org_salary$organisation[org_salary$value == min(org_salary$value)]` to `r gbp_format(max(org_salary$value))` for civil servants based at `r org_salary$organisation[org_salary$value == max(org_salary$value)]`.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-full-width .data-display}
+{{< tabset >}}
+{{< tab title="Chart" heading="hide" ref="dept-salary-chart">}}
+```{r dept_salary_chart}
+dept_salary_plot <- ggplot(org_salary, aes(x = fct_rev(dept_group), y = value)) +
+  geom_point(colour = govukhugo::govuk_colours["blue"]) +
+  coord_flip() +
+  theme_void() +
+  theme(
+    text = element_text(colour = govukhugo::govuk_colours["govuk-text-colour"]),
+    axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = 3)),
+    plot.background = element_rect(fill = "#f3f2f100", colour = NA),
+    panel.grid.major.y = element_line(colour = govukhugo::govuk_colours["mid-grey"])
+  )
+
+govukhugo::render_svg(
+  dept_salary_plot,
+  width = 800,
+  height = 600,
+  alt_title = "Median salary by departmental group/organisation",
+  alt_desc = paste(
+    "A bar chart showing the median salary for each organisation grouped by",
+    "their departmental group (in alphabetical order)."
+  ),
+  caption = "alt_title"
+)
+
+```
+{{< /tab >}}
+{{< /tabset >}}
+:::
+::::
