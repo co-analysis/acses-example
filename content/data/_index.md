@@ -4,18 +4,32 @@ date: 2022-01-17
 type: post
 listpages: false
 weight: 900
-custom_title: "Download Civil Service Statistics dataset"
+custom_title: "Download Civil Service Statistics data"
 ---
 
-The full statistical tables are [published on GOV.UK](https://www.gov.uk/government/statistics/civil-service-statistics-2021). A machine readable format has also been created that makes it easier to work with the data programmatically. You can also use our table generator tool to filter the machine readable file for the selections you are most interested in.
+The full statistical tables are [published on GOV.UK](https://www.gov.uk/government/statistics/civil-service-statistics-2021). A machine readable format has also been created that makes it easier to work with the statistical data programmatically, further details about the structure of this dataset are provided later on this page.
 
 {{< download_file link="../files/acses2021_processed.csv" text="Download the machine readable format" 
      type="CSV" size="11.9MB" >}}
 
-<a href="table_generator/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
-  Generate your own tables
+We also provide two services to allow you to focus on the data you are most interested in:
+
+- The [table browser](table_browser/) which allows you to browse and filter the 2021 machine readable statistical tables for the statistics you are most interested in.
+- The [data explorer](explorer/) which provides access to breakdowns of headcount, full-time equivalent, mean and median salary statistics of civil sevants broken down by one, two or three variables of interest.
+
+<div>
+<a href="table_browser/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+  Browse and filter the statistical tables
   <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" /></svg>
 </a>
+</div>
+
+<div>
+<a href="explorer/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+  Explore detailed statistical breakdowns
+  <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" /></svg>
+</a>
+</div>
 
 {{< break type="m" visible=true >}}
 

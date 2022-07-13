@@ -1,0 +1,137 @@
+---
+title: "Data explorer"
+knit: govukhugo::govukhugo_knit
+date: 2021-01-01
+section: data
+weight: 200
+summary: "Data explorer main page"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+library(tidyverse)
+
+data_dir <- govukhugo::data_dir()
+
+explorer_data <- readr::read_rds(file.path(data_dir, "acses_explorer.rds"))
+
+page_vars <- c(
+  "status", "year", "headcount", "fte", "mean_salary", "median_salary"
+)
+
+other_vars <- sort(names(explorer_data)[!(names(explorer_data) %in% page_vars)])
+
+page_data <- explorer_data %>%
+  filter(
+    if_all(all_of(other_vars), ~.x == "Total"),
+  ) %>%
+  select(all_of(page_vars)) %>%
+  mutate(
+    across(c(headcount, fte),
+           ~if_else(is.na(.x), "[c]", scales::comma(.x, accuracy = 1))),
+    across(c(mean_salary, median_salary),
+           ~if_else(is.na(.x), "[c]", scales::dollar(.x, accuracy = 1, prefix = "£")))
+  )
+
+var_labels <- c(
+  "all" = "All civil servants",
+  "status" = "Employment status",
+  "year" = "Year",
+  "age_band" = "Age band",
+  "dept_group" = "Departmental group",
+  "disability" = "Disability",
+  "ethnicity" = "Ethnicity",
+  "function_of_post" = "Function of post",
+  "profession_of_post" = "Profession of post",
+  "responsibility_level" = "Responsibilty level",
+  "sex" = "Sex",
+  "sexual_orientation" = "Sexual orientation",
+  "uk_region" = "UK country or region",
+  "headcount" = "Headcount",
+  "fte" = "FTE",
+  "mean_salary" = "Mean salary",
+  "median_salary" = "Median salary"
+)
+
+breadcrumb <- function(var, depth, var_labels) {
+  
+  if (depth == 0) {
+    depth_href = "#"
+  } else {
+    depth_href = paste0(rep("../", depth), collapse = "")
+  }
+  
+  htmltools::tags$li(
+    class = "govuk-breadcrumbs__list-item",
+    htmltools::tags$a(
+      class = "govuk-breadcrumbs__link",
+      href = depth_href,
+      var_labels[var]
+    )
+  )
+}
+
+further_link <- function(var, var_labels) {
+  as.character(htmltools::tags$a(
+      class = "govuk-link govuk-link--no-visited-state",
+      href = paste0(var, "/"),
+      var_labels[var])
+  )
+}
+
+```
+
+The data explorer provides access a range of further breakdowns of the underlying raw data that makes up the Civil Service Statistics. The explorer provides tables showing the headcount, full-time equivalent (FTE), mean and median salary for groups of civil servants, you are able to progressively select up to three variables to produce a breakdown of your results. The explorer tables show the figures for 2020 and 2021, and for staff in post, entrants and leavers.
+
+::::{.govuk-grid-row .data-card}
+:::{.govuk-grid-column-one-quarter .data-filters}
+```{r}
+htmltools::tagList(
+  htmltools::tags$div(
+    class = "govuk-breadcrumbs",
+    htmltools::tags$ol(
+      class = "govuk-breadcrumbs__list",
+      breadcrumb(var = "all", depth = 0, var_labels = var_labels)
+    )
+  )
+)
+
+htmltools::tagList(
+  htmltools::tags$div(
+    class = "govuk-body-s",
+    "Futher breakdowns available: ",
+    glue::glue_collapse(
+      purrr::map_chr(
+        other_vars, ~further_link(.x, var_labels)
+      ),
+      sep = ", ", last = " or "
+    )
+  )
+)
+```
+:::
+:::{.govuk-grid-column-three-quarters .data-display}
+```{r}
+page_col_names <- unname(var_labels[names(page_data)])
+
+govukhugo::govuk_datatable(
+  page_data,
+  col_names = page_col_names,
+  small_text = TRUE,
+  page_length = 10,
+  col_defs = list(
+    list(
+      className = "dt-right",
+      targets = (ncol(page_data) - 4):(ncol(page_data) - 1)
+    )
+  )
+)
+```
+:::
+::::
+
+{{< break type="m" visible=true >}}
+<h2 class="govuk-heading-s">Notes</h2>
+{{< small >}}
+Figures are rounded to the nearest 10 for headcount and full-time equivalent (FTE) and the nearest £100 for mean and median salary. Figures are suppressed when information relates to less than 50 civil servants (shown by the shorthand notiation "[c]").
+{{< /small >}}
